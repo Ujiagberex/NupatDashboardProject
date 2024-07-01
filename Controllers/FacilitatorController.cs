@@ -191,14 +191,14 @@ namespace NupatDashboardProject.Controllers
 			await _context.SaveChangesAsync();
 
 			return CreatedAtAction(nameof(GetClassSchedule), new { id = classSchedule.Id }, classSchedule);
-		}
+	}
 
 		// Get all scheduled classes
 		[HttpGet("GetAllSchedule")]
 		public async Task<ActionResult<IEnumerable<ScheduleClass>>> GetClassSchedules()
 		{
 			return await _context.ScheduleClasses.ToListAsync();
-		}
+}
 
 		// Get a specific scheduled class by Id
 		[HttpGet("GetParticularSchedule{id}")]

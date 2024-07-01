@@ -12,7 +12,7 @@ namespace NupatDashboardProject.Services
 		//This is to restrict the content uploaded to the service
 		private readonly string[] _permittedExtensions = { ".jpg", ".jpeg", ".png"};
 		private readonly string[] _permittedMimeTypes = { "image/jpg", "image/jpeg", "image/png"};
-		public PhotoService(Cloudinary cloudinary)
+        public PhotoService(Cloudinary cloudinary)
         {
            _cloudinary = cloudinary;
         }

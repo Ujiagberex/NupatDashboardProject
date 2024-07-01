@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NupatDashboardProject.Data;
 
@@ -11,9 +12,11 @@ using NupatDashboardProject.Data;
 namespace NupatDashboardProject.Migrations
 {
     [DbContext(typeof(LmsDbContext))]
-    partial class LmsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240620011231_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -363,7 +366,7 @@ namespace NupatDashboardProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ProfileId")
+                    b.Property<Guid>("ProfileId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -407,46 +410,22 @@ namespace NupatDashboardProject.Migrations
                     b.ToTable("Profiles");
                 });
 
-            modelBuilder.Entity("NupatDashboardProject.Models.ScheduleClass", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Duration")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Facilitator")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Participants")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Time")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ScheduleClasses");
-                });
-
             modelBuilder.Entity("NupatDashboardProject.Models.SocialMediaAccount", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Link")
+                    b.Property<string>("Platform")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ProfileId")
+                    b.Property<Guid>("ProfileId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -560,16 +539,24 @@ namespace NupatDashboardProject.Migrations
 
             modelBuilder.Entity("NupatDashboardProject.Models.IndustryInterest", b =>
                 {
-                    b.HasOne("NupatDashboardProject.Models.Profile", null)
-                        .WithMany("IndustryInterests")
-                        .HasForeignKey("ProfileId");
+                    b.HasOne("NupatDashboardProject.Models.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("NupatDashboardProject.Models.SocialMediaAccount", b =>
                 {
-                    b.HasOne("NupatDashboardProject.Models.Profile", null)
-                        .WithMany("SocialMediaAccounts")
-                        .HasForeignKey("ProfileId");
+                    b.HasOne("NupatDashboardProject.Models.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("NupatDashboardProject.Models.Student", b =>
@@ -586,13 +573,6 @@ namespace NupatDashboardProject.Migrations
             modelBuilder.Entity("NupatDashboardProject.Models.Course", b =>
                 {
                     b.Navigation("Students");
-                });
-
-            modelBuilder.Entity("NupatDashboardProject.Models.Profile", b =>
-                {
-                    b.Navigation("IndustryInterests");
-
-                    b.Navigation("SocialMediaAccounts");
                 });
 #pragma warning restore 612, 618
         }
