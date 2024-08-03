@@ -36,7 +36,7 @@ namespace NupatDashboardProject.Controllers
 			return Ok("successful");
 		}
 
-		[HttpGet("/GetAllCourses")]
+		[HttpGet("GetAllCourses")]
 		public IActionResult GetAll()
 		{
 			var courses = _dbContext.Courses.ToList();
@@ -62,7 +62,7 @@ namespace NupatDashboardProject.Controllers
 
 			if (course == null)
 			{
-				return BadRequest();
+				return BadRequest("Course was not found");
 			}
 			return Ok("successful");
 		}

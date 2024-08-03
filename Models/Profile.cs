@@ -13,8 +13,8 @@ namespace NupatDashboardProject.Models
         public string? HomeAddress { get; set; }
 		public string? Bios { get; set; }
 		public string? CourseOfInterest { get; set; }
-		public List<IndustryInterest> IndustryInterests { get; set; }
-		public List<SocialMediaAccount> SocialMediaAccounts { get; set; }
+		public string IndustryInterests { get; set; }
+		public string SocialMediaAccounts { get; set; }
 
 
 	}

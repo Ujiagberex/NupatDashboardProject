@@ -1,4 +1,5 @@
-﻿using NupatDashboardProject.Data;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using NupatDashboardProject.Data;
 using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
 using NupatDashboardProject.Models;
@@ -75,6 +76,7 @@ namespace NupatDashboardProject.Services
 			FindProfile.CourseOfInterest = profile.CourseOfInterest;
 			FindProfile.IndustryInterests = profile.IndustryInterests;
 			FindProfile.SocialMediaAccounts = profile.SocialMediaAccounts;
+			
 			_dbContext.SaveChanges();
 			ShowProfileDTO showProfileDTO = new ShowProfileDTO();
 			showProfileDTO.FullName = profile.FullName;

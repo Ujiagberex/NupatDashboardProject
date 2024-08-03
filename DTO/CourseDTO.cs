@@ -2,7 +2,7 @@
 {
 	public class CourseDTO
 	{
-		public Guid FacilitatorId { get; set; }
+		public string FacilitatorName { get; set; }
         public string Title {  get; set; }
 	}
 }

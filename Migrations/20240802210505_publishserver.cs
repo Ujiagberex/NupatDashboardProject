@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace NupatDashboardProject.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class publishserver : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,8 +30,9 @@ namespace NupatDashboardProject.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Cohort = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Course = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -83,18 +84,6 @@ namespace NupatDashboardProject.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Cohorts",
-                columns: table => new
-                {
-                    CohortId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Cohorts", x => x.CohortId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Contents",
                 columns: table => new
                 {
@@ -123,6 +112,19 @@ namespace NupatDashboardProject.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "IndustryInterests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Interest = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IndustryInterests", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Profiles",
                 columns: table => new
                 {
@@ -132,12 +134,48 @@ namespace NupatDashboardProject.Migrations
                     PhoneNumber = table.Column<string>(type: "nvarchar(11)", maxLength: 11, nullable: true),
                     HomeAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Bios = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IndustryInterest = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CourseOfInterest = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    CourseOfInterest = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IndustryInterests = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SocialMediaAccounts = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Profiles", x => x.ProfileId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    JwtId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsUsed = table.Column<bool>(type: "bit", nullable: false),
+                    IsRevoked = table.Column<bool>(type: "bit", nullable: false),
+                    AddedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    JwtExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ScheduleClasses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Facilitator = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Time = table.Column<int>(type: "int", nullable: false),
+                    Duration = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Participants = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ScheduleClasses", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -279,45 +317,6 @@ namespace NupatDashboardProject.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "IndustryInterests",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Interest = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProfileId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_IndustryInterests", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_IndustryInterests_Profiles_ProfileId",
-                        column: x => x.ProfileId,
-                        principalTable: "Profiles",
-                        principalColumn: "ProfileId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SocialMediaAccounts",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Platform = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProfileId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SocialMediaAccounts", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SocialMediaAccounts_Profiles_ProfileId",
-                        column: x => x.ProfileId,
-                        principalTable: "Profiles",
-                        principalColumn: "ProfileId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Students",
                 columns: table => new
                 {
@@ -382,16 +381,6 @@ namespace NupatDashboardProject.Migrations
                 column: "FacilitatorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_IndustryInterests_ProfileId",
-                table: "IndustryInterests",
-                column: "ProfileId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SocialMediaAccounts_ProfileId",
-                table: "SocialMediaAccounts",
-                column: "ProfileId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Students_CourseId",
                 table: "Students",
                 column: "CourseId");
@@ -422,16 +411,19 @@ namespace NupatDashboardProject.Migrations
                 name: "Attendances");
 
             migrationBuilder.DropTable(
-                name: "Cohorts");
-
-            migrationBuilder.DropTable(
                 name: "Contents");
 
             migrationBuilder.DropTable(
                 name: "IndustryInterests");
 
             migrationBuilder.DropTable(
-                name: "SocialMediaAccounts");
+                name: "Profiles");
+
+            migrationBuilder.DropTable(
+                name: "RefreshTokens");
+
+            migrationBuilder.DropTable(
+                name: "ScheduleClasses");
 
             migrationBuilder.DropTable(
                 name: "Students");
@@ -444,9 +436,6 @@ namespace NupatDashboardProject.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
-                name: "Profiles");
 
             migrationBuilder.DropTable(
                 name: "Courses");

@@ -11,8 +11,8 @@ namespace NupatDashboardProject.DTO
         public string? EmailAddress { get; set; }
 		public string? PhoneNumber { get; set; }
 		public string? HomeAddress { get; set; }
-		public List<SocialMediaAccount> SocialMediaAccounts { get; set; }
-		public List<IndustryInterest> IndustryInterests { get; set;}
+		public string SocialMediaAccounts { get; set; }
+		public string IndustryInterests { get; set;}
 
 
 

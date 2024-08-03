@@ -2,8 +2,8 @@
 {
     public class IndustryInterest
     {
-		public Guid Id { get; set; }
-		public string Interest { get; set; }
+        public int Id { get; set; }
+        public string Interest { get; set; }
 		
 	}
 }

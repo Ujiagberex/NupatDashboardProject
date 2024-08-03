@@ -11,26 +11,18 @@ namespace NupatDashboardProject.Data
 
 		}
 
-
+		public DbSet<RefreshToken> RefreshTokens { get; set; }
 		public DbSet<Student> Students { get; set; }
 		public DbSet<Facilitator> Facilitators { get; set; }
         public DbSet<Course> Courses { get; set; }
-<<<<<<< HEAD
-=======
-		public DbSet<Schedule> Schedules { get; set; }
->>>>>>> 67cdf85a2e92526a95514dbe61b66b7c5a885392
 		public DbSet<Profile> Profiles { get; set; }
 		public DbSet<Test> Tests { get; set; }
 		public DbSet<Content> Contents { get; set; }
 		public DbSet<Assignment> Assignments { get; set; }
 		public DbSet<Attendance> Attendances { get; set; }
-		public DbSet<Cohort> Cohorts { get; set; }
 		public DbSet<IndustryInterest> IndustryInterests { get; set; }
-		public DbSet<SocialMediaAccount> SocialMediaAccounts { get; set; }
-<<<<<<< HEAD
 		public DbSet<ScheduleClass> ScheduleClasses { get; set; }
-=======
->>>>>>> 67cdf85a2e92526a95514dbe61b66b7c5a885392
+
 
 		//protected override void OnModelCreating(ModelBuilder modelBuilder)
 		//{

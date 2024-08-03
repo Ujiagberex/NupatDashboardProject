@@ -19,7 +19,7 @@ namespace NupatDashboardProject.Services
 			{
 				CourseId = Guid.NewGuid(),
 				Title = addCourseDTO.Title,
-				FacilitatorId = addCourseDTO.FacilitatorId
+				FacilitatorName = addCourseDTO.FacilitatorName
 			};
 
 			_dbContext.Courses.Add(course);

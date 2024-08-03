@@ -163,9 +163,19 @@ namespace NupatDashboardProject.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Cohort")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Course")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -174,11 +184,7 @@ namespace NupatDashboardProject.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
+                    b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -276,21 +282,6 @@ namespace NupatDashboardProject.Migrations
                     b.ToTable("Attendances");
                 });
 
-            modelBuilder.Entity("NupatDashboardProject.Models.Cohort", b =>
-                {
-                    b.Property<Guid>("CohortId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("CohortId");
-
-                    b.ToTable("Cohorts");
-                });
-
             modelBuilder.Entity("NupatDashboardProject.Models.Content", b =>
                 {
                     b.Property<Guid>("ContentId")
@@ -325,6 +316,10 @@ namespace NupatDashboardProject.Migrations
                     b.Property<Guid>("FacilitatorId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("FacilitatorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
@@ -355,20 +350,17 @@ namespace NupatDashboardProject.Migrations
 
             modelBuilder.Entity("NupatDashboardProject.Models.IndustryInterest", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Interest")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ProfileId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ProfileId");
 
                     b.ToTable("IndustryInterests");
                 });
@@ -383,7 +375,6 @@ namespace NupatDashboardProject.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CourseOfInterest")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailAddress")
@@ -395,16 +386,59 @@ namespace NupatDashboardProject.Migrations
                     b.Property<string>("HomeAddress")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("IndustryInterest")
+                    b.Property<string>("IndustryInterests")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(11)
                         .HasColumnType("nvarchar(11)");
 
+                    b.Property<string>("SocialMediaAccounts")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("ProfileId");
 
                     b.ToTable("Profiles");
+                });
+
+            modelBuilder.Entity("NupatDashboardProject.Models.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AddedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("JwtExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("JwtId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("NupatDashboardProject.Models.ScheduleClass", b =>
@@ -433,26 +467,6 @@ namespace NupatDashboardProject.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ScheduleClasses");
-                });
-
-            modelBuilder.Entity("NupatDashboardProject.Models.SocialMediaAccount", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Link")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("ProfileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProfileId");
-
-                    b.ToTable("SocialMediaAccounts");
                 });
 
             modelBuilder.Entity("NupatDashboardProject.Models.Student", b =>
@@ -558,20 +572,6 @@ namespace NupatDashboardProject.Migrations
                     b.Navigation("Facilitator");
                 });
 
-            modelBuilder.Entity("NupatDashboardProject.Models.IndustryInterest", b =>
-                {
-                    b.HasOne("NupatDashboardProject.Models.Profile", null)
-                        .WithMany("IndustryInterests")
-                        .HasForeignKey("ProfileId");
-                });
-
-            modelBuilder.Entity("NupatDashboardProject.Models.SocialMediaAccount", b =>
-                {
-                    b.HasOne("NupatDashboardProject.Models.Profile", null)
-                        .WithMany("SocialMediaAccounts")
-                        .HasForeignKey("ProfileId");
-                });
-
             modelBuilder.Entity("NupatDashboardProject.Models.Student", b =>
                 {
                     b.HasOne("NupatDashboardProject.Models.Course", "Course")
@@ -586,13 +586,6 @@ namespace NupatDashboardProject.Migrations
             modelBuilder.Entity("NupatDashboardProject.Models.Course", b =>
                 {
                     b.Navigation("Students");
-                });
-
-            modelBuilder.Entity("NupatDashboardProject.Models.Profile", b =>
-                {
-                    b.Navigation("IndustryInterests");
-
-                    b.Navigation("SocialMediaAccounts");
                 });
 #pragma warning restore 612, 618
         }

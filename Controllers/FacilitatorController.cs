@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Nest;
 using NupatDashboardProject.Data;
 using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
@@ -23,7 +21,7 @@ namespace NupatDashboardProject.Controllers
 			_facilitator = facilitator;
 		}
 
-		[Authorize]
+		
 		// PUT: api/Facilitator
 		[HttpPut("UpdateFacilitatorBy{Id}")]
 		public IActionResult UpdateStudentById(Facilitator facilitator)
@@ -38,7 +36,7 @@ namespace NupatDashboardProject.Controllers
 		}
 
 		//Get all facilitators
-		[Authorize]
+		
 		[HttpGet]
 		[Route("GetAllFacilitator")]
 		public IActionResult GetAllFacilitators()
@@ -48,7 +46,7 @@ namespace NupatDashboardProject.Controllers
 		}
 
 		//Get Facilitator By Id
-		[Authorize]
+		
 		[HttpGet("GetFacilitatorBy{id}")]
 		public async Task<ActionResult<Facilitator>> GetFacilitator(Guid id)
 		{
@@ -74,7 +72,7 @@ namespace NupatDashboardProject.Controllers
 		}
 
 		// DELETE: api/Facilitator/5
-		[Authorize]
+		
 		[HttpDelete("DeleteFacilitatorBy{id}")]
 		public async Task<IActionResult> DeleteFacilitator(Guid id)
 		{

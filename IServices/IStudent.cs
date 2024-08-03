@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using NupatDashboardProject.DTO;
+﻿using NupatDashboardProject.DTO;
 using NupatDashboardProject.Models;
 
 namespace NupatDashboardProject.IServices
 {
-    public interface IStudent
+	public interface IStudent
     {
         void AddStudent(AddStudentDTO addStudentDTO);
         Student GetStudentById(Guid id);

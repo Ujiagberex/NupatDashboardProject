@@ -11,10 +11,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("1e7f166a-df62-419b-88fa-e7083fede610")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("NupatDashboardProject")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+48d378b2ad566506e1583707d9790a8a5c72f24e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+97119b027b63ea1400367015535a11b0566b2961")]
 [assembly: System.Reflection.AssemblyProductAttribute("NupatDashboardProject")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NupatDashboardProject")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

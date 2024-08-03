@@ -8,21 +8,22 @@ using NupatDashboardProject.Services;
 
 namespace NupatDashboardProject.Controllers
 {
-    [Route("api/[controller]")]
+	[Route("api/[controller]")]
 	[ApiController]
 	public class ProfileController : ControllerBase
 	{
 		private readonly IProfile _profile;
 		private readonly IPhotoService _photoService;
 
-		public ProfileController( IProfile profile, IPhotoService photoService)
+		public ProfileController(IProfile profile, IPhotoService photoService)
 		{
-			
+
 			_profile = profile;
 			_photoService = photoService;
 
 		}
 
+		//Upload coverphoto
 		[HttpPost("UploadCoverPhoto")]
 
 		public async Task<IActionResult> UploadCoverPhoto(IFormFile file)
@@ -153,12 +154,10 @@ namespace NupatDashboardProject.Controllers
 			var FindProfile = _profile.GetProfileById(id);
 			if (FindProfile == null)
 			{
-				return BadRequest("Picture does not exist");
+				return BadRequest("profile does not exist");
 			}
 			return Ok(FindProfile);
 		}
-
-
 
 
 		//Create Profile
@@ -204,12 +203,6 @@ namespace NupatDashboardProject.Controllers
 			}
 			return Ok("Profile deleted successfully.");
 		}
-
-
-
-
-
-
 
 	}
 }
