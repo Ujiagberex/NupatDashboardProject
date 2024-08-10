@@ -10,42 +10,54 @@ namespace NupatDashboardProject.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class AccountController(IAuth userAccount, 
+	public class AccountController(IAuth userAuth, 
 		UserManager<ApplicationUser> userManager) : ControllerBase
 	{
 		[HttpPost("ResgisterStudent")]
 
-		public async Task<IActionResult> RegisterNewStudent(RegisterStudentDTO newStudentDTO)
+		public async Task<IActionResult> RegisterNewStudent(RegisterStudentDTO StudentDTO)
 		{
-				var Response = await userAccount.RegisterStudent(newStudentDTO);
+				var Response = await userAuth.RegisterStudent(StudentDTO);
 				return Ok(Response);
 		}
 
 		[HttpPost("RegisterFacilitator")]
 
-		public async Task<IActionResult> RegisterNewFacilitator(RegisterFacilitatorDTO newFacilitatorDTO)
+		public async Task<IActionResult> RegisterNewFacilitator(RegisterFacilitatorDTO FacilitatorDTO)
 		{
 			
-				var Response = await userAccount.RegisterFacilitator(newFacilitatorDTO);
+				var Response = await userAuth.RegisterFacilitator(FacilitatorDTO);
 				return Ok(Response);
 			
 		}
 
 		[HttpPost("Login")]
-		public async Task<IActionResult> LoginNewUser(LoginDTO login)
+		public async Task<IActionResult> Login(LoginDTO loginUserDTO)
 		{
-			var user = await userAccount.FindUserByUsername("email");
-			if (user == null)
+			if (loginUserDTO == null || string.IsNullOrEmpty(loginUserDTO.UserName))
 			{
-				return NotFound();
-			}
-			var result = await userAccount.LoginUser(login, user);
-			if (result.Item1 == true)
-			{
-				return Ok(result.Item2);
+				return BadRequest("Invalid login request");
 			}
 
-			return BadRequest();
+			var result = await userAuth.LoginUser(loginUserDTO);
+			if (result.Item1)
+			{
+				return Ok(new { jwtToken = result.Item2 });
+			}
+
+			return Unauthorized("Invalid login attempt");
+		}
+
+		[HttpPost("ChangePassword")]
+		public async Task<IActionResult> ChangePassword(ChangePasswordDTO changePasswordDTO)
+		{
+			var result = await userAuth.ChangePasswordAsync(changePasswordDTO);
+			if (!result.Succeeded)
+			{
+				return BadRequest(result);
+			}
+
+			return Ok(result);
 		}
 
 		//[HttpPost("LogIn")]

@@ -7,11 +7,6 @@ namespace NupatDashboardProject.Models
 	{
 		[Key]
 		public Guid StudentId { get; set; }
-		[ForeignKey(nameof(CohortId))]
-		public Guid CohortId { get; set; }
-        
-		[ForeignKey("CourseId")]
-		public Guid CourseId { get; set; }
 		public Course Course { get; set; }
     }
 }

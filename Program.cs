@@ -1,11 +1,16 @@
+using System.Configuration;
+using System.Text;
 using CloudinaryDotNet;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Nest;
 using NupatDashboardProject.Configurations;
 using NupatDashboardProject.Data;
+using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
 using NupatDashboardProject.Models;
 using NupatDashboardProject.Services;
@@ -28,6 +33,8 @@ namespace NupatDashboardProject
 				var config = sp.GetRequiredService<IOptions<CloudinarySettings>>().Value;
 				return new Cloudinary(new Account(config.CloudName, config.ApiKey, config.ApiSecret));
 			});
+
+			builder.Services.AddHttpContextAccessor();
 			builder.Services.AddScoped<IProfile, ProfileServices>();
 			builder.Services.AddScoped<IStudent, StudentService>();
 			builder.Services.AddScoped<ISearchService, SearchService>();
@@ -37,6 +44,7 @@ namespace NupatDashboardProject
 			builder.Services.AddScoped<ICourse, CourseServices>();
 			builder.Services.AddScoped<IAuth, AuthService>();
 			builder.Services.AddScoped<ITokenGenerator, TokenGeneratorService>();
+			builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
 			builder.Services.Configure<ElasticSearchConfig>(builder.Configuration.GetSection("Elasticsearch"));
 			builder.Services.AddSingleton<IElasticClient>(sp =>
 			{
@@ -60,7 +68,7 @@ namespace NupatDashboardProject
 				options.Password.RequireUppercase = true;
 				options.Password.RequiredLength = 7;
 				options.Password.RequiredUniqueChars = 1;
-			}).AddEntityFrameworkStores<LmsDbContext>().AddDefaultTokenProviders().AddSignInManager();
+			}).AddEntityFrameworkStores<LmsDbContext>().AddDefaultTokenProviders();
 
 			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 			builder.Services.AddEndpointsApiExplorer();
@@ -75,22 +83,51 @@ namespace NupatDashboardProject
 				option.OperationFilter<SecurityRequirementsOperationFilter>();
 			});
 
+			//Add Authentication and Configure JWT
+			var jwtSettings = builder.Configuration.GetSection("JWT").Get<JwtSettings>();
+			var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
+
+			builder.Services.AddAuthentication(options =>
+			{
+				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+				options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+			})
+		.AddJwtBearer(options =>
+		{
+			options.TokenValidationParameters = new TokenValidationParameters
+			{
+				ValidateIssuer = true,
+				ValidateAudience = true,
+				ValidateIssuerSigningKey = true,
+				ValidateLifetime = true,
+				ValidIssuer = jwtSettings.Site,
+				ValidAudience = jwtSettings.Audience,
+				IssuerSigningKey = new SymmetricSecurityKey(key),
+				ClockSkew = TimeSpan.Zero
+			}; 
+		});
+
 			//Add dbcontext to project
 			string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 					
 			string environConnectivity = Environment.GetEnvironmentVariable("DefaultConnection");
-			if (_env != "Development")
+
+			builder.Services.AddDbContext<LmsDbContext>(options =>
 			{
-				builder.Services.AddDbContext<LmsDbContext>(options =>
-				options.UseSqlServer(environConnectivity));
-			}
-			else
-			{
-				builder.Services.AddDbContext<LmsDbContext>(options =>
-				{
-					options.UseSqlServer(connectionString);
-				});
-			}
+				options.UseSqlServer(connectionString);
+			});
+			//if (_env != "Development")
+			//{
+			//	builder.Services.AddDbContext<LmsDbContext>(options =>
+			//	options.UseSqlServer(environConnectivity));
+			//}
+			//else
+			//{
+			//	builder.Services.AddDbContext<LmsDbContext>(options =>
+			//	{
+			//		options.UseSqlServer(connectionString);
+			//	});
+			//}
 
 
 			var app = builder.Build();

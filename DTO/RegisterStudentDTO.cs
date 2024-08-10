@@ -14,7 +14,6 @@ namespace NupatDashboardProject.DTO
 		[Required]
 		[StringLength(100)]
 		public string Course { get; set; }
-		[Required]
 		public string Cohorts { get; set; }
 		[Required]
 		public bool IsStudent { get; internal set; }

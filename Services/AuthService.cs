@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
@@ -10,18 +11,22 @@ namespace NupatDashboardProject.Services
 	public class AuthService : IAuth
 	{
 		private readonly UserManager<ApplicationUser> _userManager;
-		private readonly SignInManager<ApplicationUser> _signInManager;
 		private readonly RoleManager<IdentityRole> _roleManager;
 		private readonly ITokenGenerator _tokenGenerator;
 		private readonly IConfiguration _configuration;
+		private readonly ILogger<AuthService> _logger;
+		private readonly IHttpContextAccessor _httpContextAccessor;
+
 
 		public AuthService(RoleManager<IdentityRole> roleManager, 
 			UserManager<ApplicationUser> userManager, 
-			SignInManager<ApplicationUser> signInManager,
 			ITokenGenerator tokenGenerator, 
-			IConfiguration configuration)
+			IConfiguration configuration,
+			ILogger<AuthService> logger,
+			IHttpContextAccessor httpContextAccessor)
 		{
-			_signInManager = signInManager;
+			_httpContextAccessor = httpContextAccessor;
+			_logger = logger;
 			_roleManager = roleManager;
 			_userManager = userManager;
 			_tokenGenerator = tokenGenerator;
@@ -31,46 +36,108 @@ namespace NupatDashboardProject.Services
 		public async Task<ApplicationUser> FindUserByUsername(string userName)
 		{
 			var user = await _userManager.FindByEmailAsync(userName);
-			return user;
-		}
-			
-
-		public async Task<(bool, AuthResponse)> LoginUser(LoginDTO loginUserDTO, ApplicationUser user)
-		{
-			var result = await _signInManager.PasswordSignInAsync(user.UserName, loginUserDTO.Password, false, lockoutOnFailure: false);
-			if (result.Succeeded)
-			{
-				var jwtToken = await _tokenGenerator.GenerateJwtToken(user.Id, user.PhoneNumber, user.UserName, user.Email, user.FullName);
-				return (true, jwtToken);
-			}
-
-			return (false, null);
+			return (user);
 		}
 
 
 		//public async Task<(bool, AuthResponse)> LoginUser(LoginDTO loginUserDTO, ApplicationUser user)
 		//{
-		//	// check user with password valid
-		//	var IsPassword = await _userManager.CheckPasswordAsync(user, loginUserDTO.Password);
-		//	if (IsPassword)
+		//	var result = await _signInManager.PasswordSignInAsync(user.UserName, loginUserDTO.Password, false, lockoutOnFailure: false);
+		//	if (result.Succeeded)
 		//	{
-		//		// generate token
-		//		var jwtToken = await _tokenGenerator.GenerateJwtToken(user.Id, user.PhoneNumber, user.UserName, user.Email,user.FullName);
+		//		var jwtToken = await _tokenGenerator.GenerateJwtToken(user.Id, user.PhoneNumber, user.UserName, user.Email, user.FullName);
 		//		return (true, jwtToken);
 		//	}
+
 		//	return (false, null);
+		//}
+
+
+		public async Task<(bool, AuthResponse)> LoginUser(LoginDTO loginUserDTO)
+		{
+			if (loginUserDTO == null)
+			{
+				throw new ArgumentNullException(nameof(loginUserDTO));
+			}
+
+			// check user has a registered email
+			var user = await _userManager.FindByEmailAsync(loginUserDTO.UserName);
+			if (user == null || loginUserDTO.Password != "Nupat_24")
+			{
+				_logger.LogWarning($"Login attempt failed: user with email {loginUserDTO.UserName} not found.");
+				throw new ArgumentNullException(nameof(user), "User not found");
+			}
+
+			if (loginUserDTO.Password != "Nupat_24")
+			{
+				_logger.LogWarning($"Login attempt failed: incorrect password for user {loginUserDTO.UserName}.");
+				throw new UnauthorizedAccessException("Invalid login attempt: incorrect password.");
+			}
+			
+
+			var roles = await _userManager.GetRolesAsync(user);
+			var jwtToken = await _tokenGenerator.GenerateJwtToken(user.Id, user.PhoneNumber, user.UserName, user.Email, user.FullName, roles);
+			
+			return  (true, jwtToken);
+		}
+
+		public async Task<AuthResult> ChangePasswordAsync(ChangePasswordDTO changePasswordDTO)
+		{
+			var user = await _userManager.FindByNameAsync(changePasswordDTO.UserName);
+			if (user == null)
+			{
+				_logger.LogWarning($"User with username {changePasswordDTO.UserName} not found.");
+				return new AuthResult { Succeeded = false, Message = "User not found." };
+			}
+
+			// Attempt to change the password
+			var result = await _userManager.ChangePasswordAsync(user, changePasswordDTO.OldPassword, changePasswordDTO.NewPassword);
+			if (!result.Succeeded)
+			{
+				_logger.LogWarning($"Password change attempt failed for user {user.Email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+				return new AuthResult { Succeeded = false, Message = "Password change failed.", Errors = result.Errors.Select(e => e.Description).ToArray() };
+			}
+
+			_logger.LogInformation($"Password change successful for user {user.Email}.");
+			return new AuthResult { Succeeded = true, Message = "Password changed successfully." };
+		}
+
+
+		//public async Task<AuthResult> ChangePasswordAsync(ChangePasswordDTO changePasswordDTO)
+		//{
+		//	var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+		//	if (string.IsNullOrEmpty(userId))
+		//	{
+		//		_logger.LogWarning("Password change attempt failed: user ID not found in context.");
+		//		return new AuthResult { Succeeded = false, Message = "User not authenticated." };
+		//	}
+
+		//	var user = await _userManager.FindByIdAsync(userId);
+		//	if (user == null)
+		//	{
+		//		_logger.LogWarning($"Password change attempt failed: user with ID {userId} not found.");
+		//		return new AuthResult { Succeeded = false, Message = "User not found." };
+		//	}
+
+		//	var result = await _userManager.ChangePasswordAsync(user, changePasswordDTO.OldPassword, changePasswordDTO.NewPassword);
+		//	if (!result.Succeeded)
+		//	{
+		//		_logger.LogWarning($"Password change attempt failed for user {user.UserName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+		//		return new AuthResult { Succeeded = false, Message = "Password change failed.", Errors = result.Errors.Select(e => e.Description).ToArray() };
+		//	}
+
+		//	_logger.LogInformation($"Password change successful for user {user.UserName}.");
+		//	return new AuthResult { Succeeded = true, Message = "Password changed successfully." };
 		//}
 
 		public async Task<string> RegisterFacilitator(RegisterFacilitatorDTO registerFacilitatorDTO)
 		{
-			string defaultPassword = _configuration["DefaultPassword:"];
 
 			ApplicationUser facilitator = new ApplicationUser()
 			{
 				Email = registerFacilitatorDTO.Email,
 				FullName = registerFacilitatorDTO.FullName,
 				Course = registerFacilitatorDTO.Course,
-				Cohort = null,
 				EmailConfirmed = true,
 				UserName = registerFacilitatorDTO.Email
 			};
@@ -109,7 +176,7 @@ namespace NupatDashboardProject.Services
 
 		public async Task<string> RegisterStudent(RegisterStudentDTO registerStudentDTO)
 		{
-			string defaultPassword = _configuration["DefaultPassword:"];
+			//string defaultPassword = _configuration["DefaultPassword:"];
 
 			ApplicationUser student = new ApplicationUser()
 			{

@@ -12,8 +12,8 @@ using NupatDashboardProject.Data;
 namespace NupatDashboardProject.Migrations
 {
     [DbContext(typeof(LmsDbContext))]
-    [Migration("20240802230359_UpdatedCF")]
-    partial class UpdatedCF
+    [Migration("20240810162116_CohortNullable")]
+    partial class CohortNullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -167,7 +167,6 @@ namespace NupatDashboardProject.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Cohort")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -476,9 +475,6 @@ namespace NupatDashboardProject.Migrations
                 {
                     b.Property<Guid>("StudentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CohortId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("CourseId")

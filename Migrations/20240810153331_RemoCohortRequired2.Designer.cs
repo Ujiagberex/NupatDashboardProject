@@ -12,8 +12,8 @@ using NupatDashboardProject.Data;
 namespace NupatDashboardProject.Migrations
 {
     [DbContext(typeof(LmsDbContext))]
-    [Migration("20240802210505_publishserver")]
-    partial class publishserver
+    [Migration("20240810153331_RemoCohortRequired2")]
+    partial class RemoCohortRequired2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -319,6 +319,10 @@ namespace NupatDashboardProject.Migrations
                     b.Property<Guid>("FacilitatorId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("FacilitatorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
@@ -472,9 +476,6 @@ namespace NupatDashboardProject.Migrations
                 {
                     b.Property<Guid>("StudentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CohortId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("CourseId")

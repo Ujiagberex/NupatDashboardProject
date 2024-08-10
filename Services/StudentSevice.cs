@@ -21,8 +21,6 @@ namespace NupatDashboardProject.Services
 			{
 				StudentId = Guid.NewGuid(),
 				FullName = addStudentDTO.FullName,
-				CourseId = addStudentDTO.CourseId,
-				CohortId = addStudentDTO.CohortId
 			};
 
 				_dataContext.Students.Add(student);

@@ -1,4 +1,5 @@
-﻿using NupatDashboardProject.DTO;
+﻿using Nest;
+using NupatDashboardProject.DTO;
 using NupatDashboardProject.Models;
 
 namespace NupatDashboardProject.IServices
@@ -7,8 +8,8 @@ namespace NupatDashboardProject.IServices
 	{
 		Task<string> RegisterStudent(RegisterStudentDTO registerStudentDTO);
 		Task<string> RegisterFacilitator(RegisterFacilitatorDTO registerFacilitatorDTO);
-
-		Task<(bool, AuthResponse)> LoginUser(LoginDTO loginUserDTO, ApplicationUser user);
+		Task<AuthResult> ChangePasswordAsync(ChangePasswordDTO changePasswordDTO);
+		Task<(bool,AuthResponse)> LoginUser(LoginDTO loginUserDTO);
 		Task<ApplicationUser> FindUserByUsername(string userName);
 	}
 }

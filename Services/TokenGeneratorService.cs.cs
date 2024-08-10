@@ -24,13 +24,18 @@ namespace NupatDashboardProject.Services
 			_context = context;
 			this.userManager = userManager;
 			_jwtSettings = jwtsettings.Value;
+
+			if (string.IsNullOrEmpty(_jwtSettings.Secret))
+			{
+				throw new ArgumentNullException(nameof(_jwtSettings.Secret), "JWT Secret is not configured");
+			}
 		}
 
 		public async Task<AuthResponse> GenerateJwtToken(string user_id, string phoneNumber, string username, string email, string fullName, IList<string> roles = null)
 		{
 			var expirationDate = DateTime.UtcNow.AddMonths(1); //Convert.ToDouble(_jwtsettings.ExpirationTime);
 			var tokenHandler = new JwtSecurityTokenHandler();
-			var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettings.Secret));
+			var SecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettings.Secret));
 			var tokenDescriptor = new SecurityTokenDescriptor
 			{
 				Subject = new ClaimsIdentity(new[]
@@ -38,14 +43,14 @@ namespace NupatDashboardProject.Services
 					new Claim(JwtRegisteredClaimNames.Sub, username),
 					new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
 					new Claim(JwtRegisteredClaimNames.Exp, expirationDate.ToString()),
-					new Claim(ClaimTypes.NameIdentifier, user_id),
-					new Claim(ClaimTypes.MobilePhone, phoneNumber ?? string.Empty),
+					//new Claim(ClaimTypes.NameIdentifier, user_id),
+					//new Claim(ClaimTypes.MobilePhone, phoneNumber ?? string.Empty),
 					new Claim(ClaimTypes.Email, email ?? string.Empty),
 					new Claim(ClaimTypes.Name, fullName ?? string.Empty),
                     //new Claim(ClaimTypes.Role, roles.FirstOrDefault() ?? ""),
                     //new Claim(ClaimTypes.Sid, customer_id ?? string.Empty),
                 }),
-				SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature),
+				SigningCredentials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256Signature),
 				Issuer = _jwtSettings.Site,
 				Audience = _jwtSettings.Audience,
 				Expires = expirationDate
@@ -76,7 +81,7 @@ namespace NupatDashboardProject.Services
 				PhoneNumber = phoneNumber,
 				Email = email,
 				FullName = fullName,
-				Roles = roles.ToArray(),
+				Roles = roles?.ToArray() ?? new string[] { }, // Ensure roles is not null
 				ExpiryTime = expirationDate
 			};
 		}
