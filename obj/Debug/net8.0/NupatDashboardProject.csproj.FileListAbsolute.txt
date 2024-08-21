@@ -111,7 +111,6 @@ C:\Users\HP\Documents\Post-Coding\NupatLmsProject\obj\Debug\net8.0\staticwebasse
 C:\Users\HP\Documents\Post-Coding\NupatLmsProject\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.NupatDashboardProject.props
 C:\Users\HP\Documents\Post-Coding\NupatLmsProject\obj\Debug\net8.0\staticwebassets.pack.json
 C:\Users\HP\Documents\Post-Coding\NupatLmsProject\obj\Debug\net8.0\scopedcss\bundle\NupatDashboardProject.styles.css
-C:\Users\HP\Documents\Post-Coding\NupatLmsProject\obj\Debug\net8.0\NupatDashboardProject.csproj.CopyComplete
 C:\Users\HP\Documents\Post-Coding\NupatLmsProject\obj\Debug\net8.0\NupatDashboardProject.dll
 C:\Users\HP\Documents\Post-Coding\NupatLmsProject\obj\Debug\net8.0\refint\NupatDashboardProject.dll
 C:\Users\HP\Documents\Post-Coding\NupatLmsProject\obj\Debug\net8.0\NupatDashboardProject.pdb
@@ -267,3 +266,9 @@ C:\Users\HP\Documents\Post-Coding\NupatLmsProject\bin\Debug\net8.0\runtimes\win\
 C:\Users\HP\Documents\Post-Coding\NupatLmsProject\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\HP\Documents\Post-Coding\NupatLmsProject\bin\Debug\net8.0\appsettings.Production.json
 C:\Users\HP\Documents\Post-Coding\NupatLmsProject\bin\Debug\net8.0\appsettings.Staging.json
+C:\Users\HP\Documents\Post-Coding\NupatLmsProject\obj\Debug\net8.0\NupatDas.374A2F1F.Up2Date
+C:\Users\HP\Documents\Post-Coding\NupatLmsProject\bin\Debug\net8.0\System.Web.Cors.dll
+C:\Users\HP\Documents\Post-Coding\NupatLmsProject\bin\Debug\net8.0\System.Net.Http.Formatting.dll
+C:\Users\HP\Documents\Post-Coding\NupatLmsProject\bin\Debug\net8.0\System.Web.Http.dll
+C:\Users\HP\Documents\Post-Coding\NupatLmsProject\bin\Debug\net8.0\System.Web.Http.Cors.dll
+C:\Users\HP\Documents\Post-Coding\NupatLmsProject\bin\Debug\net8.0\Newtonsoft.Json.Bson.dll

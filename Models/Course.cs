@@ -8,7 +8,6 @@ namespace NupatDashboardProject.Models
 		[Key]
 		public Guid CourseId { get; set; }
 		public string? Title { get; set; }
-		
         public string FacilitatorName { get; set; }
 		public Facilitator Facilitator { get; set; }
 		public ICollection<Student> Students { get; set; }

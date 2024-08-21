@@ -106,6 +106,19 @@ namespace NupatDashboardProject
 				ClockSkew = TimeSpan.Zero
 			}; 
 		});
+			builder.Services.AddCors(options =>
+			{
+				options.AddPolicy("AllowAllOrigins",
+				builder =>
+				{
+					builder.WithOrigins() // Add allowed origins here
+						   .AllowAnyMethod()
+						   .AllowAnyHeader()
+						   .AllowCredentials(); // Allows cookies/authentication tokens
+				});
+
+
+			});
 
 			//Add dbcontext to project
 			string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -116,6 +129,7 @@ namespace NupatDashboardProject
 			{
 				options.UseSqlServer(connectionString);
 			});
+
 			//if (_env != "Development")
 			//{
 			//	builder.Services.AddDbContext<LmsDbContext>(options =>
@@ -145,7 +159,7 @@ namespace NupatDashboardProject
 
 			app.UseHttpsRedirection();
 			app.UseRouting();
-			app.UseCors("AllowSpecificOrigin");
+			app.UseCors("AllowAllOrigins");
 
 			app.UseAuthentication();
 			app.UseAuthorization();

@@ -13,7 +13,7 @@ namespace NupatDashboardProject.Controllers
 	public class AccountController(IAuth userAuth, 
 		UserManager<ApplicationUser> userManager) : ControllerBase
 	{
-		[HttpPost("ResgisterStudent")]
+		[HttpPost("RegisterStudent")]
 
 		public async Task<IActionResult> RegisterNewStudent(RegisterStudentDTO StudentDTO)
 		{
@@ -52,35 +52,7 @@ namespace NupatDashboardProject.Controllers
 		public async Task<IActionResult> ChangePassword(ChangePasswordDTO changePasswordDTO)
 		{
 			var result = await userAuth.ChangePasswordAsync(changePasswordDTO);
-			if (!result.Succeeded)
-			{
-				return BadRequest(result);
-			}
-
-			return Ok(result);
+			return Ok();
 		}
-
-		//[HttpPost("LogIn")]
-
-		//public async Task<IActionResult> UserLogIn([FromBody] LoginDTO loginDTO)
-		//{
-		//	// Find the user by email
-		//	var user = await userManager.FindByEmailAsync(loginDTO.Username);
-		//	if (user == null)
-		//	{
-		//		return Unauthorized(new { flag = false, token = (string)null, message = "User not found" });
-		//	}
-
-		//	// Try to login the user
-		//	var (isAuthenticated, authResponse) = await userAccount.LoginUser(loginDTO, user);
-		//	if (!isAuthenticated)
-		//	{
-		//		return Unauthorized(new { flag = false, token = (string) null, message = "Invalid credentials" });
-		//	}
-
-		//	// Return the token
-		//	return Ok(new { flag = true, token = authResponse.AccessToken, expiration = authResponse.ExpiryTime, message = "Login successful" });
-		//}
-
 	}
 }

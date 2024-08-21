@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using System.IO.Compression;
 using Microsoft.AspNetCore.Identity;
 using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
@@ -15,17 +14,14 @@ namespace NupatDashboardProject.Services
 		private readonly ITokenGenerator _tokenGenerator;
 		private readonly IConfiguration _configuration;
 		private readonly ILogger<AuthService> _logger;
-		private readonly IHttpContextAccessor _httpContextAccessor;
 
 
 		public AuthService(RoleManager<IdentityRole> roleManager, 
 			UserManager<ApplicationUser> userManager, 
 			ITokenGenerator tokenGenerator, 
 			IConfiguration configuration,
-			ILogger<AuthService> logger,
-			IHttpContextAccessor httpContextAccessor)
+			ILogger<AuthService> logger)
 		{
-			_httpContextAccessor = httpContextAccessor;
 			_logger = logger;
 			_roleManager = roleManager;
 			_userManager = userManager;
@@ -36,7 +32,7 @@ namespace NupatDashboardProject.Services
 		public async Task<ApplicationUser> FindUserByUsername(string userName)
 		{
 			var user = await _userManager.FindByEmailAsync(userName);
-			return (user);
+			return user;
 		}
 
 
@@ -60,21 +56,14 @@ namespace NupatDashboardProject.Services
 				throw new ArgumentNullException(nameof(loginUserDTO));
 			}
 
-			// check user has a registered email
+
+			// Check user has a registered email
 			var user = await _userManager.FindByEmailAsync(loginUserDTO.UserName);
 			if (user == null || loginUserDTO.Password != "Nupat_24")
 			{
-				_logger.LogWarning($"Login attempt failed: user with email {loginUserDTO.UserName} not found.");
-				throw new ArgumentNullException(nameof(user), "User not found");
-			}
+				return (false, null);
 
-			if (loginUserDTO.Password != "Nupat_24")
-			{
-				_logger.LogWarning($"Login attempt failed: incorrect password for user {loginUserDTO.UserName}.");
-				throw new UnauthorizedAccessException("Invalid login attempt: incorrect password.");
 			}
-			
-
 			var roles = await _userManager.GetRolesAsync(user);
 			var jwtToken = await _tokenGenerator.GenerateJwtToken(user.Id, user.PhoneNumber, user.UserName, user.Email, user.FullName, roles);
 			
@@ -83,52 +72,30 @@ namespace NupatDashboardProject.Services
 
 		public async Task<AuthResult> ChangePasswordAsync(ChangePasswordDTO changePasswordDTO)
 		{
-			var user = await _userManager.FindByNameAsync(changePasswordDTO.UserName);
+			if (changePasswordDTO == null)
+			{
+				throw new ArgumentNullException(nameof(changePasswordDTO));
+			}
+
+			var user = await _userManager.FindByEmailAsync(changePasswordDTO.UserName);
 			if (user == null)
 			{
 				_logger.LogWarning($"User with username {changePasswordDTO.UserName} not found.");
 				return new AuthResult { Succeeded = false, Message = "User not found." };
 			}
 
+
 			// Attempt to change the password
-			var result = await _userManager.ChangePasswordAsync(user, changePasswordDTO.OldPassword, changePasswordDTO.NewPassword);
+			var result = await _userManager.ChangePasswordAsync(user, changePasswordDTO.Password, changePasswordDTO.NewPassword);
 			if (!result.Succeeded)
 			{
-				_logger.LogWarning($"Password change attempt failed for user {user.Email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+				_logger.LogWarning($"Password change attempt failed for user {user.UserName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
 				return new AuthResult { Succeeded = false, Message = "Password change failed.", Errors = result.Errors.Select(e => e.Description).ToArray() };
 			}
 
-			_logger.LogInformation($"Password change successful for user {user.Email}.");
+			_logger.LogInformation($"Password change successful for user {user.UserName}.");
 			return new AuthResult { Succeeded = true, Message = "Password changed successfully." };
 		}
-
-
-		//public async Task<AuthResult> ChangePasswordAsync(ChangePasswordDTO changePasswordDTO)
-		//{
-		//	var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-		//	if (string.IsNullOrEmpty(userId))
-		//	{
-		//		_logger.LogWarning("Password change attempt failed: user ID not found in context.");
-		//		return new AuthResult { Succeeded = false, Message = "User not authenticated." };
-		//	}
-
-		//	var user = await _userManager.FindByIdAsync(userId);
-		//	if (user == null)
-		//	{
-		//		_logger.LogWarning($"Password change attempt failed: user with ID {userId} not found.");
-		//		return new AuthResult { Succeeded = false, Message = "User not found." };
-		//	}
-
-		//	var result = await _userManager.ChangePasswordAsync(user, changePasswordDTO.OldPassword, changePasswordDTO.NewPassword);
-		//	if (!result.Succeeded)
-		//	{
-		//		_logger.LogWarning($"Password change attempt failed for user {user.UserName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-		//		return new AuthResult { Succeeded = false, Message = "Password change failed.", Errors = result.Errors.Select(e => e.Description).ToArray() };
-		//	}
-
-		//	_logger.LogInformation($"Password change successful for user {user.UserName}.");
-		//	return new AuthResult { Succeeded = true, Message = "Password changed successfully." };
-		//}
 
 		public async Task<string> RegisterFacilitator(RegisterFacilitatorDTO registerFacilitatorDTO)
 		{
@@ -143,7 +110,8 @@ namespace NupatDashboardProject.Services
 			};
 
 			//Create User
-			var createResult = await _userManager.CreateAsync(facilitator);
+			
+            var createResult = await _userManager.CreateAsync(facilitator);
 			if (createResult.Succeeded)
 			{
 
@@ -168,7 +136,6 @@ namespace NupatDashboardProject.Services
 				{
 					return AddFacilitatorToRole.Errors.First().Description;
 				}
-
 			}
 			return createResult.Errors.First().Description;
 
@@ -190,7 +157,7 @@ namespace NupatDashboardProject.Services
 
 			// create user
 			var createResult = await _userManager.CreateAsync(student);
-			if(createResult.Succeeded) 
+			if(createResult.Succeeded)
 			{ 
 
 			var roleExist = await _roleManager.RoleExistsAsync(RoleName.Student.ToString());
@@ -217,6 +184,7 @@ namespace NupatDashboardProject.Services
 
 			}
 			return createResult.Errors.First().Description;
+ 
 		}
 	}
 }
