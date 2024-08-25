@@ -5,6 +5,7 @@ using NupatDashboardProject.Data;
 using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
 using NupatDashboardProject.Models;
+using ServiceStack.Text;
 
 namespace NupatDashboardProject.Controllers
 {
@@ -15,13 +16,16 @@ namespace NupatDashboardProject.Controllers
 		
 		private readonly LmsDbContext _context;
 		private readonly IFacilitator _facilitator;
+		
+
 		public FacilitatorController(LmsDbContext context, IFacilitator facilitator)
 		{
 			_context = context;
 			_facilitator = facilitator;
+			
 		}
 
-		
+
 		// PUT: api/Facilitator
 		[HttpPut("UpdateFacilitatorBy{Id}")]
 		public IActionResult UpdateStudentById(Facilitator facilitator)
@@ -105,9 +109,8 @@ namespace NupatDashboardProject.Controllers
 				var content = new Content
 				{
 					ContentId = Guid.NewGuid(),
-					CohortId = uploadContentDTO.CohortId,
 					FileName = uploadContentDTO.File.FileName,
-					FileData = memoryStream.ToArray(),
+					Owner = uploadContentDTO.Owner,
 					UploadDate = DateTime.Now
 				};
 
@@ -115,9 +118,10 @@ namespace NupatDashboardProject.Controllers
 				await _context.SaveChangesAsync();
 			}
 
-			return Ok("Content uploaded successfully.");
+			return Ok( "Content uploaded successfully.");
 
 		}
+
 		//Delete Content 
 		[HttpDelete("DeleteContentBy{id}")]
 		public async Task<IActionResult> DeleteContent(Guid id)
@@ -132,52 +136,70 @@ namespace NupatDashboardProject.Controllers
 			_context.Contents.Remove(content);
 			await _context.SaveChangesAsync();
 
-			return NoContent();
+			return Ok("Successfully Deleted");
 		}
-		//Addtest
-		[HttpPost("AddTest")]
-		public async Task<ActionResult<Test>> AddTest(Test newTest)
+		
+		//Get all content
+		[HttpGet("GetAllContent")]
+		public async Task<ActionResult<IEnumerable<Content>>> GetContents()
 		{
-			if (newTest == null)
-			{
-				return BadRequest("Test cannot be null.");
-			}
-
-			newTest.TestId = Guid.NewGuid(); // Ensure the TestId is set to a new GUID
-			_context.Tests.Add(newTest);
-			await _context.SaveChangesAsync();
-
-			return CreatedAtAction(nameof(GetTestById), new { id = newTest.TestId }, newTest);
+			return await _context.Contents.ToListAsync();
 		}
-		//Delete Test By Id
-		[HttpDelete("DeleteTestBy{id}")]
-		public async Task<IActionResult> DeleteTest(Guid id)
-		{
-			var test = await _context.Tests.FindAsync(id);
 
-			if (test == null)
+		//Get Uploaded Content by Id 
+		[HttpGet("GetContentBy{id}")]
+		public async Task<IActionResult> GetAssignmentById(Guid id)
+		{
+			var content = await _context.Contents.FindAsync(id);
+
+			if (content == null)
 			{
 				return NotFound();
 			}
 
-			_context.Tests.Remove(test);
-			await _context.SaveChangesAsync();
-
-			return NoContent();
+			return Ok(content);
 		}
 
-		//Get test by Id
-		[HttpGet("GetTestBy{id}")]
-		public async Task<ActionResult<Test>> GetTestById(Guid id)
+		[HttpPut("UpdateContentBy{id}")]
+		public async Task<IActionResult> UpdateContent(Guid id, [FromForm] UpdateContentDTO updateContentDTO)
 		{
-			var test = await _context.Tests.FindAsync(id);
+			// Find the existing content by its ID
+			var content = await _context.Contents.FindAsync(id);
 
-			if (test == null)
+			// Check if the content exists
+			if (content == null)
 			{
-				return NotFound();
+				return NotFound(new { message = "Content not found." });
 			}
 
-			return Ok(test);
+			// Update the content properties
+			if (updateContentDTO.File != null && updateContentDTO.File.Length > 0)
+			{
+				using (var memoryStream = new MemoryStream())
+				{
+					await updateContentDTO.File.CopyToAsync(memoryStream);
+					// Optionally, store or process the file content
+				}
+
+				content.FileName = updateContentDTO.File.FileName;
+			}
+
+			content.Owner = updateContentDTO.Owner;
+			content.UploadDate = DateTime.Now; // Update the upload date
+
+			try
+			{
+				// Save the updated content to the database
+				_context.Contents.Update(content);
+				await _context.SaveChangesAsync();
+
+				return Ok(new { message = "Content updated successfully.", content });
+			}
+			catch (Exception ex)
+			{
+				// Handle any errors that may occur
+				return StatusCode(500,"An error occurred while updating the content.");
+			}
 		}
 
 		//Create Schedule
@@ -185,18 +207,21 @@ namespace NupatDashboardProject.Controllers
 		public async Task<ActionResult<ScheduleClass>> PostClassSchedule(ScheduleClass classSchedule)
 		{
 			classSchedule.Id = Guid.NewGuid();
+			classSchedule.Date = classSchedule.Date;
+			classSchedule.Duration = classSchedule.Duration;
+			classSchedule.Time = classSchedule.Time;
 			_context.ScheduleClasses.Add(classSchedule);
 			await _context.SaveChangesAsync();
 
 			return CreatedAtAction(nameof(GetClassSchedule), new { id = classSchedule.Id }, classSchedule);
-	}
+		}
 
 		// Get all scheduled classes
 		[HttpGet("GetAllSchedule")]
 		public async Task<ActionResult<IEnumerable<ScheduleClass>>> GetClassSchedules()
 		{
 			return await _context.ScheduleClasses.ToListAsync();
-}
+		}
 
 		// Get a specific scheduled class by Id
 		[HttpGet("GetParticularSchedule{id}")]
@@ -260,6 +285,128 @@ namespace NupatDashboardProject.Controllers
 		{
 			return _context.ScheduleClasses.Any(e => e.Id == id);
 		}
+
+		//Upload Assignment
+		[HttpPost("uploadAssignment")]
+		public async Task<IActionResult> UploadAssignment(UploadAssignmentDTO uploadAssignmentDTO)
+		{
+			long maxFileSize = 100 * 1024 * 1024; // 100 MB in bytes
+
+			if (uploadAssignmentDTO.File == null || uploadAssignmentDTO.File.Length == 0)
+				return BadRequest("No file uploaded.");
+			if(uploadAssignmentDTO.File.Length > maxFileSize)
+			{
+				throw new InvalidOperationException("File size exceeds the maximum allowed limit of 100 MB.");
+			}
+			using (var memoryStream = new MemoryStream())
+			{
+				await uploadAssignmentDTO.File.CopyToAsync(memoryStream);
+				var assignment = new Assignment
+				{
+					AssignmentId = Guid.NewGuid(),
+					DateUploaded = DateTime.Now,
+					DueDate = uploadAssignmentDTO.Duedate,
+					FilePath = uploadAssignmentDTO.File.FileName,
+
+				};
+
+				_context.Assignments.Add(assignment);
+				await _context.SaveChangesAsync();
+			}
+
+			return Ok("Content uploaded successfully.");
+		}
+
+		//Get all student assignments
+		[HttpGet("GetAllAssignments")]
+		public async Task<IActionResult> GetAssignments()
+		{
+			var assignments = await _context.Assignments.ToListAsync();
+			return Ok(assignments);
+		}
+
+		//Get assignment by Id
+		[HttpGet("GetAssignmentBy{id}")]
+		public async Task<IActionResult> GetContentById(Guid id)
+		{
+			var assignment = await _context.Assignments.FindAsync(id);
+
+			if (assignment == null)
+			{
+				return NotFound();
+			}
+
+			return Ok(assignment);
+		}
+
+		//Update assignment
+		[HttpPut("UpdateAssignmentBy{id}")]
+		public async Task<IActionResult> UpdateAssignment(Guid id, [FromForm] UpdateAssignmentDTO updateAssignmentDTO)
+		{
+			long maxFileSize = 100 * 1024 * 1024; // 100 MB in bytes
+
+			// Find the existing assignment by its ID
+			var assignment = await _context.Assignments.FindAsync(id);
+
+			// Check if the assignment exists
+			if (assignment == null)
+			{
+				return NotFound(new { message = "Assignment not found." });
+			}
+
+			// Update the assignment properties
+			if (updateAssignmentDTO.File != null && updateAssignmentDTO.File.Length > 0)
+			{
+				if (updateAssignmentDTO.File.Length > maxFileSize)
+				{
+					return BadRequest(new { message = "File size exceeds the maximum allowed limit of 100 MB." });
+				}
+
+				using (var memoryStream = new MemoryStream())
+				{
+					await updateAssignmentDTO.File.CopyToAsync(memoryStream);
+					// Optionally, store or process the file content
+				}
+
+				assignment.FilePath = updateAssignmentDTO.File.FileName;
+			}
+
+			assignment.DueDate = updateAssignmentDTO.DueDate;
+			assignment.DateUploaded = DateTime.Now; // Update the upload date
+
+			try
+			{
+				// Save the updated assignment to the database
+				_context.Assignments.Update(assignment);
+				await _context.SaveChangesAsync();
+
+				return Ok(new { message = "Assignment updated successfully.", assignment });
+			}
+			catch (Exception ex)
+			{
+				// Handle any errors that may occur
+				return StatusCode(500, new { message = "An error occurred while updating the assignment.", error = ex.Message });
+			}
+		}
+
+
+		//Delete assignment
+		[HttpDelete("DeleteAssignmentBy{id}")]
+		public async Task<IActionResult> DeleteAssignment(Guid id)
+		{
+			var assignment = await _context.Assignments.FindAsync(id);
+
+			if (assignment == null)
+			{
+				return NotFound("Assignment Id not found");
+			}
+
+			_context.Assignments.Remove(assignment);
+			await _context.SaveChangesAsync();
+
+			return Ok("Successfully Deleted");
+		}
+
 	}
 
 }

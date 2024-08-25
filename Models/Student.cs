@@ -3,10 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NupatDashboardProject.Models
 {
-	public class Student : User
+	public class Student
 	{
-		[Key]
-		public Guid StudentId { get; set; }
-		public Course Course { get; set; }
-    }
+        public string Id { get; set; }
+		public string FullName { get; set; }		
+		public string? Cohort { get; set; }
+		public string Course { get; set; }
+
+	}
 }

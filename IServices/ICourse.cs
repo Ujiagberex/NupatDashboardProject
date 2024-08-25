@@ -9,6 +9,6 @@ namespace NupatDashboardProject.IServices
         Course GetcourseById(Guid id);
         IEnumerable<Course> GetAllCourses();
         bool DeleteCourseById(Guid id);
-        ShowStudentDTO UpdateById(Course course);
+        
     }
 }

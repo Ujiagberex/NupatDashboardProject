@@ -12,7 +12,7 @@ namespace NupatDashboardProject.DTO
 		public string? PhoneNumber { get; set; }
 		public string? HomeAddress { get; set; }
 		public string SocialMediaAccounts { get; set; }
-		public string IndustryInterests { get; set;}
+		public string IndustryInterests { get; set; }
 
 
 

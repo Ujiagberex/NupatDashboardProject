@@ -11,6 +11,7 @@ namespace NupatDashboardProject.Data
 
 		}
 
+		public DbSet<StudentResource> StudentResources { get; set; }
 		public DbSet<RefreshToken> RefreshTokens { get; set; }
 		public DbSet<Student> Students { get; set; }
 		public DbSet<Facilitator> Facilitators { get; set; }

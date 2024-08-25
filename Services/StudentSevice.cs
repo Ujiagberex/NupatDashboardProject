@@ -1,32 +1,50 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol;
 using NupatDashboardProject.Data;
 using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
 using NupatDashboardProject.Models;
+using ServiceStack;
 
 namespace NupatDashboardProject.Services
 {
-    public class StudentService : IStudent
+	public class StudentService : IStudent
 	{
-			private readonly LmsDbContext _dataContext;
-			public StudentService(LmsDbContext dataContext)
-			{
-				_dataContext = dataContext;
-			}
-		public void AddStudent(AddStudentDTO addStudentDTO)
+		private readonly LmsDbContext _dataContext;
+		private readonly UserManager<ApplicationUser> _userManager;
+		public StudentService(LmsDbContext dataContext, UserManager<ApplicationUser> userManager)
 		{
-			
-		Student student = new Student
+			_dataContext = dataContext;
+			_userManager = userManager;
+		}
+		public async Task<string> GetStudentById(string id)
+		{
+			if (string.IsNullOrEmpty(id))
 			{
-				StudentId = Guid.NewGuid(),
-				FullName = addStudentDTO.FullName,
+				return ("Student ID is required");
+			}
+
+			var student = await _userManager.FindByIdAsync(id);
+
+			if (student == null)
+			{
+				return ("Student not found");
+			}
+
+			var studentDTO = new StudentDTO()
+			{
+				Id = student.Id,
+				Email = student.Email,
+				FullName = student.FullName,
+				Cohort = student.Cohort,
+				Course = student.Course
 			};
 
-				_dataContext.Students.Add(student);
-				_dataContext.SaveChanges();
-				
-			}
+			return studentDTO.ToString();
+
+		}
 
 		public bool DeleteStudentById(Guid id)
 			{
@@ -46,24 +64,6 @@ namespace NupatDashboardProject.Services
 			return _dataContext.Students.AsEnumerable();
 			}
 
-		public Student GetStudentById(Guid id)
-			{
-				return _dataContext.Students.Find(id);
-			}
-
-		public ShowStudentDTO UpdateStudentById(Student student)
-			{
-			var FindStudent = GetStudentById(student.StudentId);
-			if (FindStudent == null)
-			{
-				return null;
-
-			}
-			FindStudent.FullName = student.FullName;
-			_dataContext.SaveChanges();
-			ShowStudentDTO showStudentDTO = new ShowStudentDTO();
-			showStudentDTO.FullName = student.FullName;
-			return showStudentDTO;
-			}
+		
 	}
 }

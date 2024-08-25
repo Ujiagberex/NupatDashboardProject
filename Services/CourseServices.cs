@@ -48,10 +48,5 @@ namespace NupatDashboardProject.Services
 		{
 			throw new NotImplementedException();
 		}
-
-		public ShowStudentDTO UpdateById(Course course)
-		{
-			throw new NotImplementedException();
-		}
 	}
 }

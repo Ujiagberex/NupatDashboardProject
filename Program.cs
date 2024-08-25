@@ -111,7 +111,7 @@ namespace NupatDashboardProject
 				options.AddPolicy("AllowAllOrigins",
 				builder =>
 				{
-					builder.WithOrigins() // Add allowed origins here
+					builder.WithOrigins("https://nupat-student-dashboard-chi.vercel.app", "https://student-dashboard-azure.vercel.app") // Add allowed origins here
 						   .AllowAnyMethod()
 						   .AllowAnyHeader()
 						   .AllowCredentials(); // Allows cookies/authentication tokens
@@ -129,6 +129,7 @@ namespace NupatDashboardProject
 			{
 				options.UseSqlServer(connectionString);
 			});
+
 
 			//if (_env != "Development")
 			//{
@@ -157,9 +158,9 @@ namespace NupatDashboardProject
 			app.UseSwagger();
 			app.UseSwaggerUI();
 
-			app.UseHttpsRedirection();
-			app.UseRouting();
+			app.UseHttpsRedirection();			
 			app.UseCors("AllowAllOrigins");
+			app.UseRouting();
 
 			app.UseAuthentication();
 			app.UseAuthorization();

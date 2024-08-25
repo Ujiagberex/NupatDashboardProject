@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Nest;
 using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
@@ -11,60 +13,111 @@ namespace NupatDashboardProject.Controllers
 	public class StudentController : ControllerBase
 	{
 		private readonly IStudent _student;
-		public StudentController(IStudent student)
+		private readonly UserManager<ApplicationUser> _userManager;
+		public StudentController(IStudent student, UserManager<ApplicationUser> userManager)
 		{
 			_student = student;
+			_userManager = userManager;
 		}
-		
-		[HttpPost]
-		[Route("CreateStudent")]
-		public IActionResult AddStudent(AddStudentDTO student)
-		{
-			_student.AddStudent(student);
 
-			return Ok("successful");
-		}
-		
-		[HttpDelete("DeleteStudentBy{Id}")]
-		public IActionResult DeleteStudentById(Guid id)
+		//[HttpGet("GetStudentBy{Id}")]
+
+		//public async Task<IActionResult> GetStudentByIdAsync(string id)
+		//{
+		//	var response = _student.GetStudentById(id);
+		//	if (response == null)
+		//	{ 
+		//		return BadRequest("This Student was not found");
+		//	}
+		//	return Ok(response);
+		//}
+
+		[HttpGet("GetStudentById/{id}")]
+		public async Task<IActionResult> GetStudentById(string id)
 		{
-			bool student = _student.DeleteStudentById(id);
+			if (string.IsNullOrEmpty(id))
+			{
+				return BadRequest("Invalid student ID");
+			}
+
+			var student = await _userManager.FindByIdAsync(id.ToString());
+
 			if (student == null)
 			{
-				return BadRequest();
+				return NotFound("Student not found");
 			}
-			return Ok("successful");
-		}
 
-		[HttpGet("GetStudentBy{id}")]
-		public IActionResult GetStudentById(Guid id)
-		{
-			var FindStudent = _student.GetStudentById(id);
-			if (FindStudent == null)
+			var studentDTO = new StudentDTO()
 			{
-				return BadRequest("student does not exist");
-			}
-			return Ok(FindStudent);
+				Id = student.Id,
+				Email = student.Email,
+				FullName = student.FullName,
+				Cohort = student.Cohort,
+				Course = student.Course
+			};
+
+			return Ok(studentDTO);
 		}
 
-		[HttpGet]
-		[Route("GetAllStudent")]
-		public IActionResult GetAllStudents()
+		[HttpGet("GetAllStudents")]
+		public async Task<IActionResult> GetAllStudents()
 		{
-			var students = _student.GetAllStudents();
-			return Ok(students);
-		}
+			// Assuming "Student" is the role name for students
+			var students = await _userManager.GetUsersInRoleAsync("Student");  /*GetUsersInRoleAsync("Student");*/
 
-		[HttpPut("UpdateStudentBy{Id}")]
-		public IActionResult UpdateStudentById(Student student)
-		{
-			var update = _student.UpdateStudentById(student);
-			if (update == null)
+			if (students == null || !students.Any())
 			{
-				return NotFound();
+				return NotFound("No students found");
 			}
-			return Ok(update);
 
+			// Map the students to a list of StudentDTOs
+			var studentDTOs = students.Select(student => new StudentDTO
+			{
+				Id = student.Id,
+				FullName = student.FullName,
+				Email = student.Email,
+				Cohort = student.Cohort,
+				Course = student.Course
+
+			}).ToList();
+
+			return Ok(studentDTOs);
 		}
+
+
+		[HttpDelete("DeleteStudentBy{Id}")]
+		public async Task<IActionResult> DeleteStudentById(string id)
+		{
+			if (string.IsNullOrEmpty(id))
+			{
+				return BadRequest("Student ID cannot be null or empty.");
+			}
+
+			// Find the student by ID
+			var student = await _userManager.FindByIdAsync(id);
+
+			if (student == null)
+			{
+				return NotFound("The student was not found");
+			}
+
+			// Delete the student
+			var result = await _userManager.DeleteAsync(student);
+			if (!result.Succeeded)
+			{
+				return StatusCode(500, "An error occurred while deleting the student.");
+			}
+
+			return Ok("Student deleted successfully.");
 		}
+
+		//[HttpGet]
+		//[Route("GetAllStudent")]
+		//public IActionResult GetAllStudents()
+		//{
+		//	var students = _student.GetAllStudents();
+		//	return Ok(students);
+		//}
+
+	}
 	}

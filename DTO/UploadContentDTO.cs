@@ -1,8 +1,12 @@
-﻿namespace NupatDashboardProject.DTO
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace NupatDashboardProject.DTO
 {
 	public class UploadContentDTO
 	{
-		public Guid CohortId { get; set; }
-		public IFormFile File { get; set; }
+
+		[StringLength(50)]
+        public string Owner { get; set; }
+        public IFormFile File { get; set; }
 	}
 }

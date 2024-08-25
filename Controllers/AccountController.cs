@@ -52,6 +52,11 @@ namespace NupatDashboardProject.Controllers
 		public async Task<IActionResult> ChangePassword(ChangePasswordDTO changePasswordDTO)
 		{
 			var result = await userAuth.ChangePasswordAsync(changePasswordDTO);
+			if (!result.Succeeded)
+			{
+				return BadRequest();
+			}
+
 			return Ok();
 		}
 	}

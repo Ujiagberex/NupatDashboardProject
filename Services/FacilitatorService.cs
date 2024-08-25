@@ -1,22 +1,22 @@
-﻿using CloudinaryDotNet;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using NupatDashboardProject.Data;
 using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
 using NupatDashboardProject.Models;
-using ServiceStack;
 
 namespace NupatDashboardProject.Services
 {
 	public class FacilitatorService : IFacilitator
 	{
 		private readonly LmsDbContext _dataContext;
+		private readonly IWebHostEnvironment _environment;
 
-        public FacilitatorService(LmsDbContext dataContext)
-        {
-			_dataContext = dataContext;  
-        }
-        public void AddFacilitator(AddFacilitatorDTO addFacilitatorDTO)
+		public FacilitatorService(LmsDbContext dataContext, IWebHostEnvironment environment)
+		{
+			_dataContext = dataContext;
+			_environment = environment;
+		}
+		public void AddFacilitator(AddFacilitatorDTO addFacilitatorDTO)
 		{
 
 			Facilitator facilitator = new Facilitator
@@ -26,7 +26,7 @@ namespace NupatDashboardProject.Services
 				Course = addFacilitatorDTO.Course
 			};
 
-			 _dataContext.Facilitators.Add(facilitator);
+			_dataContext.Facilitators.Add(facilitator);
 			_dataContext.SaveChanges();
 		}
 
@@ -53,6 +53,7 @@ namespace NupatDashboardProject.Services
 			return _dataContext.Facilitators.Find(id);
 		}
 
+
 		public ShowFacilitatorDTO UpdateFacilitatorById(Facilitator facilitator)
 		{
 			var FindFacilitator = GetfacilitatorById(facilitator.FacilitatorId);
@@ -67,5 +68,8 @@ namespace NupatDashboardProject.Services
 			showFacilitatorDTO.FullName = facilitator.FullName;
 			return showFacilitatorDTO;
 		}
+	
+
+		
 	}
 }

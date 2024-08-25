@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace NupatDashboardProject.Migrations
 {
     /// <inheritdoc />
-    public partial class RemoCohortRequired : Migration
+    public partial class DatetimeForAssignment1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,7 +31,7 @@ namespace NupatDashboardProject.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Cohort = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Cohort = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Course = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -58,10 +58,10 @@ namespace NupatDashboardProject.Migrations
                 columns: table => new
                 {
                     AssignmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AssignmentTitle = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Remarks = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Marks = table.Column<int>(type: "int", nullable: false),
-                    SubmissionDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    FileData = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    DateUploaded = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -88,9 +88,9 @@ namespace NupatDashboardProject.Migrations
                 columns: table => new
                 {
                     ContentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CohortId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Owner = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FileData = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    FileData = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
                     UploadDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -176,6 +176,22 @@ namespace NupatDashboardProject.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ScheduleClasses", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StudentResources",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileSize = table.Column<long>(type: "bigint", nullable: false),
+                    DateUploaded = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentResources", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -321,19 +337,20 @@ namespace NupatDashboardProject.Migrations
                 name: "Students",
                 columns: table => new
                 {
-                    StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Cohort = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Course = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Students", x => x.StudentId);
+                    table.PrimaryKey("PK_Students", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Students_Courses_CourseId",
                         column: x => x.CourseId,
                         principalTable: "Courses",
-                        principalColumn: "CourseId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "CourseId");
                 });
 
             migrationBuilder.CreateIndex(
@@ -424,6 +441,9 @@ namespace NupatDashboardProject.Migrations
 
             migrationBuilder.DropTable(
                 name: "ScheduleClasses");
+
+            migrationBuilder.DropTable(
+                name: "StudentResources");
 
             migrationBuilder.DropTable(
                 name: "Students");

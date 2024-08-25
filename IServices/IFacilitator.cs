@@ -1,4 +1,5 @@
-﻿using NupatDashboardProject.DTO;
+﻿using Microsoft.AspNetCore.Mvc;
+using NupatDashboardProject.DTO;
 using NupatDashboardProject.Models;
 
 namespace NupatDashboardProject.IServices
