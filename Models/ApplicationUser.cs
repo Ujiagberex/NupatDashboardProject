@@ -13,6 +13,6 @@ namespace NupatDashboardProject.Models
 		[Required]
 		[StringLength(50)]
 		public string Course { get; set; }
-		
-    }
+		public bool IsPasswordChanged { get; set; }
+}
 }

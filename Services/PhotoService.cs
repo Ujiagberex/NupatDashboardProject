@@ -17,25 +17,24 @@ namespace NupatDashboardProject.Services
            _cloudinary = cloudinary;
         }
 
+
 		public async Task<ImageUploadResult> AddPhotoAsync(IFormFile file)
 		{
-			if (!IsImage(file))
+			if (file == null || file.Length == 0 || !IsImage(file))
 			{
-				throw new ArgumentException("Invalid file type. Only image files are allowed.");
+				throw new ArgumentException("Invalid file type or no file uploaded. Only image files are allowed.");
 			}
 
-			var uploadResult = new ImageUploadResult();
-			if (file.Length > 0)
+			using var stream = file.OpenReadStream();
+			var uploadParams = new ImageUploadParams
 			{
-				await using var stream = file.OpenReadStream();
-				var uploadParams = new ImageUploadParams
-				{
-					File = new FileDescription(file.FileName, stream),
-					Transformation = new Transformation().Crop("fill").Gravity("face").Width(500).Height(500)
-				};
-				uploadResult = await _cloudinary.UploadAsync(uploadParams);
-			}
-			return uploadResult;
+				File = new FileDescription(file.FileName, stream),
+				Transformation = new Transformation().Crop("fill").Gravity("face").Width(500).Height(500),
+				Folder = "profile_pictures"
+			};
+
+			// Execute upload and return the result
+			return await _cloudinary.UploadAsync(uploadParams);
 		}
 
 		public async Task<ListResourcesResult> GetAllPhotosAsync()
@@ -48,11 +47,15 @@ namespace NupatDashboardProject.Services
 			return result;
 		}
 
-		public async Task<DeletionResult> DeletePhotoAsync(string publicId)
+		public async Task<DeletionResult> DeletePhotoByIdAsync(string publicId)
 		{
+			if (string.IsNullOrEmpty(publicId))
+			{
+				throw new ArgumentException("Public ID cannot be null or empty.");
+			}
+
 			var deletionParams = new DeletionParams(publicId);
-			var result = await _cloudinary.DestroyAsync(deletionParams);
-			return result;
+			return await _cloudinary.DestroyAsync(deletionParams);
 		}
 
 		public async Task<ImageUploadResult> AddCoverPhotoPhotoAsync(IFormFile file)
@@ -68,7 +71,8 @@ namespace NupatDashboardProject.Services
 				var uploadParams = new ImageUploadParams
 				{
 					File = new FileDescription(file.FileName, stream),
-					Transformation = new Transformation().Crop("fill").Width(851).Height(315)
+					Transformation = new Transformation().Crop("fill").Width(851).Height(315),
+					Folder = "cover_pictures"
 				};
 				coverUploadResult = await _cloudinary.UploadAsync(uploadParams);
 			}
@@ -83,14 +87,22 @@ namespace NupatDashboardProject.Services
 			return result;
 		}
 
-		public async Task<ListResourcesResult> GetAllCoverPhotosAsync()
+		public async Task<List<string>> GetAllCoverPhotosAsync()
 		{
 			var listParams = new ListResourcesParams
 			{
 				MaxResults = 500
 			};
+
 			var result = await _cloudinary.ListResourcesAsync(listParams);
-			return result;
+
+			// Manually filter results by checking the folder path in the public ID
+			var coverPhotoUrls = result.Resources
+				.Where(r => r.PublicId.StartsWith("cover_photos/"))
+				.Select(r => r.Url.ToString())
+				.ToList();
+
+			return coverPhotoUrls;
 		}
 
 		//Method to check the extention type and the Mime type

@@ -18,7 +18,7 @@
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net8.0"
+          "net6.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
@@ -26,8 +26,8 @@
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net8.0": {
-            "targetAlias": "net8.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {}
           }
         },
@@ -43,8 +43,8 @@
         }
       },
       "frameworks": {
-        "net8.0": {
-          "targetAlias": "net8.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "dependencies": {
             "CloudinaryDotNet": {
               "target": "Package",
@@ -56,43 +56,39 @@
             },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
-              "version": "[8.0.7, )"
+              "version": "[6.0.33, )"
             },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.4, )"
+              "version": "[6.0.33, )"
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.4, )"
+              "version": "[6.0.33, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.4, )"
+              "version": "[6.0.33, )"
             },
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
-              "version": "[8.0.4, )"
+              "version": "[6.0.33, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.4, )"
+              "version": "[6.0.33, )"
             },
             "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",
-              "version": "[8.0.3, )"
-            },
-            "NEST": {
-              "target": "Package",
-              "version": "[7.17.5, )"
+              "version": "[6.0.15, )"
             },
             "ServiceStack.Text": {
               "target": "Package",
-              "version": "[8.2.2, )"
+              "version": "[6.11.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
@@ -100,11 +96,11 @@
             },
             "Swashbuckle.AspNetCore.Filters": {
               "target": "Package",
-              "version": "[8.0.2, )"
+              "version": "[6.0.18, )"
             },
             "System.IdentityModel.Tokens.Jwt": {
               "target": "Package",
-              "version": "[8.0.1, )"
+              "version": "[6.35.1, )"
             }
           },
           "imports": [
@@ -126,7 +122,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     }

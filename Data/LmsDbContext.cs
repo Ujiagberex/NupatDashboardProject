@@ -22,7 +22,6 @@ namespace NupatDashboardProject.Data
 		public DbSet<Assignment> Assignments { get; set; }
 		public DbSet<Attendance> Attendances { get; set; }
 		public DbSet<IndustryInterest> IndustryInterests { get; set; }
-		public DbSet<ScheduleClass> ScheduleClasses { get; set; }
 
 
 		//protected override void OnModelCreating(ModelBuilder modelBuilder)

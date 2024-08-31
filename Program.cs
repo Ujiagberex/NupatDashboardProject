@@ -1,4 +1,3 @@
-using System.Configuration;
 using System.Text;
 using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -7,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Nest;
 using NupatDashboardProject.Configurations;
 using NupatDashboardProject.Data;
 using NupatDashboardProject.DTO;
@@ -37,7 +35,6 @@ namespace NupatDashboardProject
 			builder.Services.AddHttpContextAccessor();
 			builder.Services.AddScoped<IProfile, ProfileServices>();
 			builder.Services.AddScoped<IStudent, StudentService>();
-			builder.Services.AddScoped<ISearchService, SearchService>();
 			builder.Services.AddScoped<IPhotoService, PhotoService>();
 			builder.Services.AddScoped<ICourseRepository, PopularCourseRepo>();
 			builder.Services.AddScoped<IFacilitator, FacilitatorService>();
@@ -46,13 +43,6 @@ namespace NupatDashboardProject
 			builder.Services.AddScoped<ITokenGenerator, TokenGeneratorService>();
 			builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
 			builder.Services.Configure<ElasticSearchConfig>(builder.Configuration.GetSection("Elasticsearch"));
-			builder.Services.AddSingleton<IElasticClient>(sp =>
-			{
-				var settings = new ConnectionSettings(new Uri(builder.Configuration["Elasticsearch:Url"]))
-					.DefaultIndex(builder.Configuration["Elasticsearch:Index"]);
-				return new ElasticClient(settings);
-			});
-			builder.Services.AddScoped<ISearchService, SearchService>();
 			builder.Services.AddControllers();
 
 			//Add Identity
@@ -77,8 +67,10 @@ namespace NupatDashboardProject
 				option.AddSecurityDefinition("Oauth2", new OpenApiSecurityScheme
 				{
 					In = ParameterLocation.Header,
+					Description = "Please enter into field the word 'Bearer' followed by a space and the JWT",
 					Name = "Authorization",
-					Type = SecuritySchemeType.ApiKey
+					Type = SecuritySchemeType.ApiKey,
+					Scheme = "Bearer"
 				});
 				option.OperationFilter<SecurityRequirementsOperationFilter>();
 			});

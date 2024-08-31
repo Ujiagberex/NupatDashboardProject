@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Nest;
 using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
 using NupatDashboardProject.Models;
@@ -20,18 +19,7 @@ namespace NupatDashboardProject.Controllers
 			_userManager = userManager;
 		}
 
-		//[HttpGet("GetStudentBy{Id}")]
-
-		//public async Task<IActionResult> GetStudentByIdAsync(string id)
-		//{
-		//	var response = _student.GetStudentById(id);
-		//	if (response == null)
-		//	{ 
-		//		return BadRequest("This Student was not found");
-		//	}
-		//	return Ok(response);
-		//}
-
+		
 		[HttpGet("GetStudentById/{id}")]
 		public async Task<IActionResult> GetStudentById(string id)
 		{

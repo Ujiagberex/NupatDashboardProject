@@ -2,11 +2,11 @@
 
 namespace NupatDashboardProject.DTO
 {
-	public class ChangePasswordDTO : LoginDTO
+	public class ChangePasswordDTO
 	{
-       
-        
-		[DataType(DataType.Password)]
+
+		public string UserName { get; set; }
+		public string CurrentPassword { get; set; }
 		public string NewPassword { get; set; }
 
 		//[Required]

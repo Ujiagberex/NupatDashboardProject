@@ -17,10 +17,10 @@ namespace NupatDashboardProject.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "6.0.33")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -55,7 +55,7 @@ namespace NupatDashboardProject.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -80,7 +80,7 @@ namespace NupatDashboardProject.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -187,6 +187,9 @@ namespace NupatDashboardProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsPasswordChanged")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -246,11 +249,18 @@ namespace NupatDashboardProject.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<byte[]>("FileData")
+                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("FilePath")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("SubmissionDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("AssignmentId");
 
@@ -287,6 +297,7 @@ namespace NupatDashboardProject.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<byte[]>("FileData")
+                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("FileName")
@@ -352,7 +363,7 @@ namespace NupatDashboardProject.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Interest")
                         .IsRequired()
@@ -439,34 +450,6 @@ namespace NupatDashboardProject.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("NupatDashboardProject.Models.ScheduleClass", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Duration")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Facilitator")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Participants")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Time")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ScheduleClasses");
-                });
-
             modelBuilder.Entity("NupatDashboardProject.Models.Student", b =>
                 {
                     b.Property<string>("Id")
@@ -499,7 +482,7 @@ namespace NupatDashboardProject.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<DateTime>("DateUploaded")
                         .HasColumnType("datetime2");

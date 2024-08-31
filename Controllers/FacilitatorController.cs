@@ -25,77 +25,6 @@ namespace NupatDashboardProject.Controllers
 			
 		}
 
-
-		// PUT: api/Facilitator
-		[HttpPut("UpdateFacilitatorBy{Id}")]
-		public IActionResult UpdateStudentById(Facilitator facilitator)
-		{
-			var update = _facilitator.UpdateFacilitatorById(facilitator);
-			if (update == null)
-			{
-				return NotFound();
-			}
-			return Ok(update);
-
-		}
-
-		//Get all facilitators
-		
-		[HttpGet]
-		[Route("GetAllFacilitator")]
-		public IActionResult GetAllFacilitators()
-		{
-			var facilitators = _facilitator.GetAllFacilitators();
-			return Ok(facilitators);
-		}
-
-		//Get Facilitator By Id
-		
-		[HttpGet("GetFacilitatorBy{id}")]
-		public async Task<ActionResult<Facilitator>> GetFacilitator(Guid id)
-		{
-			var facilitator = await _context.Facilitators.FindAsync(id);
-
-			if (facilitator == null)
-			{
-				return NotFound();
-			}
-
-			return facilitator;
-		}
-
-
-		// POST: api/Facilitator
-		[HttpPost]
-		[Route("CreateFacilitator")]
-		public IActionResult AddProfile(AddFacilitatorDTO facilitator)
-		{
-			_facilitator.AddFacilitator(facilitator);
-
-			return Ok("Successful");
-		}
-
-		// DELETE: api/Facilitator/5
-		
-		[HttpDelete("DeleteFacilitatorBy{id}")]
-		public async Task<IActionResult> DeleteFacilitator(Guid id)
-		{
-			var facilitator = await _context.Facilitators.FindAsync(id);
-			if (facilitator == null)
-			{
-				return NotFound();
-			}
-
-			_context.Facilitators.Remove(facilitator);
-			await _context.SaveChangesAsync();
-
-			return NoContent();
-		}
-		private bool FacilitatorExists(Guid id)
-		{
-			return _context.Facilitators.Any(e => e.FacilitatorId == id);
-		}
-
 		//Upload Content By Facilitator
 		[HttpPost("UploadContent")]
 		public async Task<IActionResult> UploadContent([FromForm] UploadContentDTO uploadContentDTO)
@@ -110,6 +39,7 @@ namespace NupatDashboardProject.Controllers
 				{
 					ContentId = Guid.NewGuid(),
 					FileName = uploadContentDTO.File.FileName,
+					FileData = memoryStream.ToArray(),
 					Owner = uploadContentDTO.Owner,
 					UploadDate = DateTime.Now
 				};
@@ -202,93 +132,9 @@ namespace NupatDashboardProject.Controllers
 			}
 		}
 
-		//Create Schedule
-		[HttpPost("CreateClassSchedule")]
-		public async Task<ActionResult<ScheduleClass>> PostClassSchedule(ScheduleClass classSchedule)
-		{
-			classSchedule.Id = Guid.NewGuid();
-			classSchedule.Date = classSchedule.Date;
-			classSchedule.Duration = classSchedule.Duration;
-			classSchedule.Time = classSchedule.Time;
-			_context.ScheduleClasses.Add(classSchedule);
-			await _context.SaveChangesAsync();
-
-			return CreatedAtAction(nameof(GetClassSchedule), new { id = classSchedule.Id }, classSchedule);
-		}
-
-		// Get all scheduled classes
-		[HttpGet("GetAllSchedule")]
-		public async Task<ActionResult<IEnumerable<ScheduleClass>>> GetClassSchedules()
-		{
-			return await _context.ScheduleClasses.ToListAsync();
-		}
-
-		// Get a specific scheduled class by Id
-		[HttpGet("GetParticularSchedule{id}")]
-		public async Task<ActionResult<ScheduleClass>> GetClassSchedule(Guid id)
-		{
-			var classSchedule = await _context.ScheduleClasses.FindAsync(id);
-			if (classSchedule == null)
-			{
-				return NotFound();
-			}
-			return classSchedule;
-		}
-
-		// Update an existing class schedule
-		[HttpPut("UpdateSchedule{id}")]
-		public async Task<IActionResult> PutClassSchedule(Guid id, ScheduleClass classSchedule)
-		{
-			if (id != classSchedule.Id)
-			{
-				return BadRequest();
-			}
-
-			_context.Entry(classSchedule).State = EntityState.Modified;
-
-			try
-			{
-				await _context.SaveChangesAsync();
-			}
-			catch (DbUpdateConcurrencyException)
-			{
-				if (!ClassScheduleExists(id))
-				{
-					return NotFound();
-				}
-				else
-				{
-					throw;
-				}
-			}
-
-			return NoContent();
-		}
-
-		// Delete a class schedule
-		[HttpDelete("DeleteScheduleBy{id}")]
-		public async Task<IActionResult> DeleteClassSchedule(Guid id)
-		{
-			var classSchedule = await _context.ScheduleClasses.FindAsync(id);
-			if (classSchedule == null)
-			{
-				return NotFound();
-			}
-
-			_context.ScheduleClasses.Remove(classSchedule);
-			await _context.SaveChangesAsync();
-
-			return NoContent();
-		}
-
-		private bool ClassScheduleExists(Guid id)
-		{
-			return _context.ScheduleClasses.Any(e => e.Id == id);
-		}
-
 		//Upload Assignment
 		[HttpPost("uploadAssignment")]
-		public async Task<IActionResult> UploadAssignment(UploadAssignmentDTO uploadAssignmentDTO)
+		public async Task<IActionResult> UploadAssignment([FromForm] UploadAssignmentDTO uploadAssignmentDTO)
 		{
 			long maxFileSize = 100 * 1024 * 1024; // 100 MB in bytes
 
@@ -306,6 +152,7 @@ namespace NupatDashboardProject.Controllers
 					AssignmentId = Guid.NewGuid(),
 					DateUploaded = DateTime.Now,
 					DueDate = uploadAssignmentDTO.Duedate,
+					FileData = memoryStream.ToArray(),
 					FilePath = uploadAssignmentDTO.File.FileName,
 
 				};
@@ -315,6 +162,85 @@ namespace NupatDashboardProject.Controllers
 			}
 
 			return Ok("Content uploaded successfully.");
+		}
+
+		// POST: api/Assignments/submit
+		[HttpPost("submitAssignment")]
+		public async Task<IActionResult> SubmitAssignment([FromForm] SubmitAssignmentDTO submitAssignmentDTO)
+		{
+			long maxFileSize = 100 * 1024 * 1024; // 100 MB in bytes
+
+			if (submitAssignmentDTO.File == null || submitAssignmentDTO.File.Length == 0)
+				return BadRequest("No file uploaded.");
+
+			if (submitAssignmentDTO.File.Length > maxFileSize)
+				throw new InvalidOperationException("File size exceeds the maximum allowed limit of 100 MB.");
+
+			// Check if the assignment exists
+			var assignment = await _context.Assignments.FindAsync(submitAssignmentDTO.AssignmentId);
+			if (assignment == null)
+			{
+				return NotFound("Assignment not found.");
+			}
+
+			// Check if the assignment is still open for submission
+			if (assignment.DueDate < DateTime.Now)
+			{
+				return BadRequest("The assignment submission deadline has passed.");
+			}
+
+			// Store the file data and update assignment status
+			using (var memoryStream = new MemoryStream())
+			{
+				await submitAssignmentDTO.File.CopyToAsync(memoryStream);
+				assignment.FileData = memoryStream.ToArray();
+				assignment.SubmissionDate = DateTime.Now;
+				assignment.Status = "Submitted"; // Or any other status you'd like to set
+				assignment.FilePath = submitAssignmentDTO.File.FileName; // Assuming FilePath stores the file name
+			}
+
+			_context.Assignments.Update(assignment);
+			await _context.SaveChangesAsync();
+
+			return Ok("Assignment submitted successfully.");
+		}
+
+		// GET: api/Assignments/download/{assignmentId}
+		[HttpGet("downloadAssignment/{assignmentId}")]
+		public async Task<IActionResult> DownloadAssignment(Guid assignmentId)
+		{
+			// Retrieve the assignment from the database
+			var assignment = await _context.Assignments.FindAsync(assignmentId);
+			if (assignment == null)
+			{
+				return NotFound("Assignment not found.");
+			}
+
+			// Check if the assignment has a file attached
+			if (assignment.FileData == null || assignment.FileData.Length == 0)
+			{
+				return NotFound("No file available for this assignment.");
+			}
+
+			// Set the content type based on the file extension (optional, for better browser support)
+			var contentType = "application/octet-stream"; // Default binary stream
+			var extension = Path.GetExtension(assignment.FilePath)?.ToLowerInvariant();
+			if (!string.IsNullOrEmpty(extension))
+			{
+				contentType = extension switch
+				{
+					".pdf" => "application/pdf",
+					".doc" or ".docx" => "application/msword",
+					".xls" or ".xlsx" => "application/vnd.ms-excel",
+					".jpg" or ".jpeg" => "image/jpeg",
+					".png" => "image/png",
+					_ => "application/octet-stream",
+				};
+			}
+
+			// Return the file for download
+			var fileStream = new MemoryStream(assignment.FileData);
+			return File(fileStream, contentType, assignment.FilePath);
 		}
 
 		//Get all student assignments

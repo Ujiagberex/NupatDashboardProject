@@ -36,18 +36,38 @@ namespace NupatDashboardProject.Services
 		}
 
 
-		//public async Task<(bool, AuthResponse)> LoginUser(LoginDTO loginUserDTO, ApplicationUser user)
+		//Login Service
+		//public async Task<(bool, AuthResponse)> LoginUser(LoginDTO loginUserDTO)
 		//{
-		//	var result = await _signInManager.PasswordSignInAsync(user.UserName, loginUserDTO.Password, false, lockoutOnFailure: false);
-		//	if (result.Succeeded)
+		//	if (loginUserDTO == null)
 		//	{
-		//		var jwtToken = await _tokenGenerator.GenerateJwtToken(user.Id, user.PhoneNumber, user.UserName, user.Email, user.FullName);
-		//		return (true, jwtToken);
+		//		throw new ArgumentNullException(nameof(loginUserDTO));
 		//	}
 
-		//	return (false, null);
-		//}
 
+		//	// Check user has a registered email
+		//	var user = await _userManager.FindByEmailAsync(loginUserDTO.UserName);
+		//	if (user == null )
+		//	{
+		//		return (false, null);
+
+		//	}
+		//	// Check if the provided password is the fixed password
+		//	if (loginUserDTO.Password != "Nupat_24")
+		//	{
+		//		// Check if the provided password is correct
+		//		var passwordValid = await _userManager.CheckPasswordAsync(user, loginUserDTO.Password);
+		//		if (!passwordValid)
+		//		{
+		//			return (false, null);
+		//		}
+		//	}
+
+		//	var roles = await _userManager.GetRolesAsync(user);
+		//	var jwtToken = await _tokenGenerator.GenerateJwtToken(user.Id, user.PhoneNumber, user.UserName, user.Email, user.FullName, roles);
+
+		//	return  (true, jwtToken);
+		//}
 
 		public async Task<(bool, AuthResponse)> LoginUser(LoginDTO loginUserDTO)
 		{
@@ -56,49 +76,41 @@ namespace NupatDashboardProject.Services
 				throw new ArgumentNullException(nameof(loginUserDTO));
 			}
 
-
-			// Check user has a registered email
+			// Check if the user has a registered email
 			var user = await _userManager.FindByEmailAsync(loginUserDTO.UserName);
-			if (user == null || loginUserDTO.Password != "Nupat_24")
-			{
-				return (false, null);
-
-			}
-			var roles = await _userManager.GetRolesAsync(user);
-			var jwtToken = await _tokenGenerator.GenerateJwtToken(user.Id, user.PhoneNumber, user.UserName, user.Email, user.FullName, roles);
-			
-			return  (true, jwtToken);
-		}
-
-		public async Task<AuthResult> ChangePasswordAsync(ChangePasswordDTO changePasswordDTO)
-		{
-			if (changePasswordDTO == null)
-			{
-				throw new ArgumentNullException(nameof(changePasswordDTO));
-			}
-
-			var user = await _userManager.FindByEmailAsync(changePasswordDTO.UserName);
 			if (user == null)
 			{
-				_logger.LogWarning($"User with username {changePasswordDTO.UserName} not found.");
-				return new AuthResult { Succeeded = false, Message = "User not found." };
+				return (false, null);
 			}
 
-
-			// Attempt to change the password
-			var result = await _userManager.ChangePasswordAsync(user, changePasswordDTO.Password, changePasswordDTO.NewPassword);
-			if (!result.Succeeded)
+			// Check if the fixed password can be used
+			if (!user.IsPasswordChanged && loginUserDTO.Password == "Nupat_24")
 			{
-				_logger.LogWarning($"Password change attempt failed for user {user.UserName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-				return new AuthResult { Succeeded = false, Message = "Password change failed.", Errors = result.Errors.Select(e => e.Description).ToArray() };
+				// Proceed to generate the token
+				var userRoles = await _userManager.GetRolesAsync(user);
+				var _jwtToken = await _tokenGenerator.GenerateJwtToken(user.Id, user.PhoneNumber, user.UserName, user.Email, user.FullName, userRoles);
+				return (true, _jwtToken);
 			}
 
-			_logger.LogInformation($"Password change successful for user {user.UserName}.");
-			return new AuthResult { Succeeded = true, Message = "Password changed successfully." };
+			// Validate the actual password
+			var passwordValid = await _userManager.CheckPasswordAsync(user, loginUserDTO.Password);
+			if (!passwordValid)
+			{
+				return (false, null);
+			}
+
+			// Proceed to generate the token
+			var roles = await _userManager.GetRolesAsync(user);
+			var jwtToken = await _tokenGenerator.GenerateJwtToken(user.Id, user.PhoneNumber, user.UserName, user.Email, user.FullName, roles);
+			return (true, jwtToken);
 		}
 
+
+
+		//Sign-up facilitator
 		public async Task<string> RegisterFacilitator(RegisterFacilitatorDTO registerFacilitatorDTO)
 		{
+			
 
 			ApplicationUser facilitator = new ApplicationUser()
 			{
@@ -110,8 +122,10 @@ namespace NupatDashboardProject.Services
 			};
 
 			//Create User
-			
-            var createResult = await _userManager.CreateAsync(facilitator);
+			// Set the fixed password
+			var password = "Nupat_24";
+
+			var createResult = await _userManager.CreateAsync(facilitator, password);
 			if (createResult.Succeeded)
 			{
 
@@ -156,7 +170,10 @@ namespace NupatDashboardProject.Services
 			};
 
 			// create user
-			var createResult = await _userManager.CreateAsync(student);
+			// Set the fixed password
+			var password = "Nupat_24";
+
+			var createResult = await _userManager.CreateAsync(student, password);
 			if(createResult.Succeeded)
 			{ 
 
@@ -186,5 +203,68 @@ namespace NupatDashboardProject.Services
 			return createResult.Errors.First().Description;
  
 		}
+
+		//Change password service
+		public async Task<(bool, string)> ChangePassword(ChangePasswordDTO changePasswordDTO)
+		{
+			if (changePasswordDTO == null)
+			{
+				throw new ArgumentNullException(nameof(changePasswordDTO));
+			}
+
+			// Find the user by username
+			var user = await _userManager.FindByNameAsync(changePasswordDTO.UserName);
+			if (user == null)
+			{
+				return (false, "User not found.");
+			}
+
+			// Check if the current password is the fixed password and the user has not changed their password before
+			if (changePasswordDTO.CurrentPassword == "Nupat_24" && !user.IsPasswordChanged)
+			{
+				// Remove old password and add the new one
+				var removeResult = await _userManager.RemovePasswordAsync(user);
+				if (!removeResult.Succeeded)
+				{
+					return (false, "Failed to remove old password.");
+				}
+
+				var addResult = await _userManager.AddPasswordAsync(user, changePasswordDTO.NewPassword);
+				if (addResult.Succeeded)
+				{
+					// Mark the user as having changed their password
+					user.IsPasswordChanged = true;
+					await _userManager.UpdateAsync(user);
+
+					return (true, "Password changed successfully.");
+				}
+				else
+				{
+					return (false, string.Join(", ", addResult.Errors.Select(e => e.Description)));
+				}
+			}
+
+			// Validate the current password against the stored password
+			var passwordValid = await _userManager.CheckPasswordAsync(user, changePasswordDTO.CurrentPassword);
+			if (!passwordValid)
+			{
+				return (false, "Incorrect password.");
+			}
+
+			// Change the password using the provided new password
+			var changePasswordResult = await _userManager.ChangePasswordAsync(user, changePasswordDTO.CurrentPassword, changePasswordDTO.NewPassword);
+			if (changePasswordResult.Succeeded)
+			{
+				// Mark the user as having changed their password
+				user.IsPasswordChanged = true;
+				await _userManager.UpdateAsync(user);
+
+				return (true, "Password changed successfully.");
+			}
+
+			return (false, string.Join(", ", changePasswordResult.Errors.Select(e => e.Description)));
+		}
+
+
 	}
 }

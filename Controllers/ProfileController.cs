@@ -119,7 +119,7 @@ namespace NupatDashboardProject.Controllers
 		[HttpDelete("DeleteProfilePhoto/{publicId}")]
 		public async Task<IActionResult> DeletePhoto(string publicId)
 		{
-			var result = await _photoService.DeletePhotoAsync(publicId);
+			var result = await _photoService.DeletePhotoByIdAsync(publicId);
 
 			if (result.Result == "ok")
 			{

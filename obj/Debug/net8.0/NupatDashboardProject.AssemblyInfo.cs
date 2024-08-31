@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NupatDashboardProject")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+826cb3e6ed9eac2f0ab21d154ff50948db29b49b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c02d0f3999f3d48346a948ce14b40d1a6cda365d")]
 [assembly: System.Reflection.AssemblyProductAttribute("NupatDashboardProject")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NupatDashboardProject")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NupatDashboardProject.Data;
 using NupatDashboardProject.DTO;
@@ -8,23 +7,20 @@ using NupatDashboardProject.Models;
 
 namespace NupatDashboardProject.Controllers
 {
-    [Route("api/Courses")]
+	[Route("api/Courses")]
 	[ApiController]
 	public class CourseController : ControllerBase
 	{
 
 		private readonly LmsDbContext _dbContext;
-		private readonly ISearchService _searchService;
 		private readonly ICourse _course;
 		private readonly ICourseRepository _courseRepository;
 
 
-		public CourseController(LmsDbContext dbContext, ICourse course, ISearchService searchService,
-			ICourseRepository courseRepository)
+		public CourseController(LmsDbContext dbContext, ICourse course,ICourseRepository courseRepository)
 		{
 			_dbContext = dbContext;
 			_course = course;
-			_searchService = searchService;
 			_courseRepository = courseRepository;
 		}
 
@@ -92,18 +88,6 @@ namespace NupatDashboardProject.Controllers
 			};
 
 			return Ok(overallAttendance);
-		}
-
-		[HttpGet("Search")]
-		public async Task<IActionResult> Get([FromQuery] string query, [FromQuery] int page = 1, [FromQuery] int limit = 10)
-		{
-			if (string.IsNullOrWhiteSpace(query))
-			{
-				return BadRequest("Query parameter is required");
-			}
-
-			var result = await _searchService.SearchAsync(query, page, limit);
-			return Ok(result);
 		}
 
 		[HttpGet("PopularCourses")]
