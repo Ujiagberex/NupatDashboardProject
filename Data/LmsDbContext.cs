@@ -19,6 +19,8 @@ namespace NupatDashboardProject.Data
 		public DbSet<Profile> Profiles { get; set; }
 		public DbSet<Test> Tests { get; set; }
 		public DbSet<Content> Contents { get; set; }
+		public DbSet<ClassSchedule> ClassSchedules { get; set; }
+		public DbSet<Event> Events { get; set; } 
 		public DbSet<Assignment> Assignments { get; set; }
 		public DbSet<Attendance> Attendances { get; set; }
 		public DbSet<IndustryInterest> IndustryInterests { get; set; }

@@ -12,8 +12,8 @@ using NupatDashboardProject.Data;
 namespace NupatDashboardProject.Migrations
 {
     [DbContext(typeof(LmsDbContext))]
-    [Migration("20240830233540_RemovedAssignmentId")]
-    partial class RemovedAssignmentId
+    [Migration("20240831203803_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -189,6 +189,9 @@ namespace NupatDashboardProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsPasswordChanged")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -237,7 +240,7 @@ namespace NupatDashboardProject.Migrations
 
             modelBuilder.Entity("NupatDashboardProject.Models.Assignment", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("AssignmentId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -261,7 +264,7 @@ namespace NupatDashboardProject.Migrations
                     b.Property<DateTime?>("SubmissionDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                    b.HasKey("AssignmentId");
 
                     b.ToTable("Assignments");
                 });
