@@ -14,5 +14,7 @@ namespace NupatDashboardProject.Models
 		[StringLength(50)]
 		public string Course { get; set; }
 		public bool IsPasswordChanged { get; set; }
-}
+
+		public ICollection<SubmitAssignment> SubmittedAssignments { get; set; }
+	}
 }

@@ -46,7 +46,7 @@ namespace NupatDashboardProject.Services
 
 		}
 
-		public bool DeleteStudentById(Guid id)
+		public bool DeleteStudentById(string id)
 			{
 				Student student = _dataContext.Students.Find(id);
 				if (student == null)

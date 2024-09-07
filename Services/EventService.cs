@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NupatDashboardProject.Data;
+using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
 using NupatDashboardProject.Models;
 
@@ -7,73 +8,57 @@ namespace NupatDashboardProject.Services
 {
 	public class EventService : IEventService
 	{
-		private readonly LmsDbContext _context;
+		private readonly LmsDbContext _dbContext;
 		private readonly IWebHostEnvironment _environment;
 
-		public EventService(LmsDbContext context, IWebHostEnvironment environment)
+		public EventService(LmsDbContext dbContext, IWebHostEnvironment environment)
 		{
-			_context = context;
+			_dbContext = dbContext;
 			_environment = environment;
 		}
 
-		public async Task<bool> ScheduleEventAsync(IFormFile image, string eventLink)
+		// Schedule an event with image and link
+		public async Task<bool> ScheduleEventAsync(ScheduleEventDTO eventDTO)
 		{
-			try
+			if (eventDTO.Image == null || eventDTO.Image.Length == 0)
+				throw new InvalidOperationException("Invalid image file.");
+
+			var eventEntity = new Event
 			{
-				// Save the image to a folder
-				var imagePath = await SaveImageAsync(image);
+				EventLink = eventDTO.EventLink
+			};
 
-				// Create a new event
-				var newEvent = new Event
-				{
-					ImagePath = imagePath,
-					EventLink = eventLink,
-					Date = DateTime.Now, // Assuming event date is now or use a provided date
-					Time = DateTime.Now.TimeOfDay // Assuming event time is now or use a provided time
-				};
-
-				// Save the event to the database
-				await _context.Events.AddAsync(newEvent);
-				await _context.SaveChangesAsync();
-
-				return true;
-			}
-			catch (Exception ex)
+			// Store the file data in the database
+			using (var memoryStream = new MemoryStream())
 			{
-				// Handle or log the exception as needed
-				return false;
+				await eventDTO.Image.CopyToAsync(memoryStream);
+				eventEntity.FileData = memoryStream.ToArray();
 			}
+
+			_dbContext.Events.Add(eventEntity);
+			await _dbContext.SaveChangesAsync();
+
+			return true;
 		}
 
+		// Retrieve the scheduled events
 		public async Task<IEnumerable<Event>> GetScheduledEventsAsync()
 		{
-			// Fetch all events from the database
-			return await _context.Events.ToListAsync();
+			return await _dbContext.Events.ToListAsync();
 		}
 
-		private async Task<string> SaveImageAsync(IFormFile image)
+		// Implement the method to delete event by Id
+		public async Task<bool> DeleteEventByIdAsync(int eventId)
 		{
-			// Check if the image is not null and has content
-			if (image == null || image.Length == 0)
+			var eventEntity = await _dbContext.Events.FindAsync(eventId);
+			if (eventEntity == null)
 			{
-				throw new ArgumentException("Image file is not valid.");
+				return false; // Event not found
 			}
 
-			// Create a unique file name
-			var fileName = Path.GetFileNameWithoutExtension(image.FileName);
-			var extension = Path.GetExtension(image.FileName);
-			var uniqueFileName = $"{fileName}_{Guid.NewGuid()}{extension}";
-
-			// Define the path to save the file
-			var path = Path.Combine(_environment.WebRootPath, "uploads", uniqueFileName);
-
-			// Save the file to the specified path
-			using (var fileStream = new FileStream(path, FileMode.Create))
-			{
-				await image.CopyToAsync(fileStream);
-			}
-
-			return Path.Combine("uploads", uniqueFileName);
+			_dbContext.Events.Remove(eventEntity);
+			await _dbContext.SaveChangesAsync();
+			return true; // Event successfully deleted
 		}
 	}
 }

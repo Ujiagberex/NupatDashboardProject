@@ -8,7 +8,7 @@ namespace NupatDashboardProject.IServices
     {
 		Task<string> GetStudentById(string id);
 		IEnumerable<Student> GetAllStudents();
-		bool DeleteStudentById(Guid id);
+		bool DeleteStudentById(string id);
 
 	}
 }

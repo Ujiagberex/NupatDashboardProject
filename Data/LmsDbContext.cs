@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NupatDashboardProject.Models;
 
@@ -23,71 +24,28 @@ namespace NupatDashboardProject.Data
 		public DbSet<Event> Events { get; set; } 
 		public DbSet<Assignment> Assignments { get; set; }
 		public DbSet<Attendance> Attendances { get; set; }
-		public DbSet<IndustryInterest> IndustryInterests { get; set; }
+		public DbSet<SubmitAssignment> SubmittedAssignments { get; set; }
 
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			modelBuilder.Entity<SubmitAssignment>()
+				.HasOne(sa => sa.Assignment)
+				.WithMany(a => a.SubmittedAssignments)   // One assignment can have many submitted assignments
+				.HasForeignKey(sa => sa.AssignmentId);   // Foreign key on SubmittedAssignment
 
-		//protected override void OnModelCreating(ModelBuilder modelBuilder)
-		//{
-		//	//// Configure the Cohort entity
-		//	modelBuilder.Entity<Cohort>(entity =>
-		//	{
-		//		entity.HasKey(e => e.CohortId); // Specify primary key
+			modelBuilder.Entity<SubmitAssignment>()
+				.HasOne(sa => sa.Student)  // Navigation property
+				.WithMany()  // Assuming no navigation property in ApplicationUser
+				.HasForeignKey(sa => sa.StudentId)  // Foreign key
+				.OnDelete(DeleteBehavior.Cascade);  // Cascade delete when a user is deleted
+			base.OnModelCreating(modelBuilder);
 
-		//		entity.Property(e => e.Name)
-		//			.IsRequired() // Make Name property required
-		//			.HasMaxLength(100); // Set a maximum length for Name
-		//			.OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
-		//	});
+			modelBuilder.Entity<IdentityUserLogin<string>>()
+				.HasKey(login => new { login.LoginProvider, login.ProviderKey });
 
-		//	// Configure the Student entity
-		//	modelBuilder.Entity<Student>(entity =>
-		//	{
-		//		entity.HasKey(e => e.StudentId); // Specify primary key
-
-		//		entity.HasOne(s => s.Cohort) // Configure many-to-one relationship
-		//			.WithMany(c => c.Students)
-		//			.HasForeignKey(s => s.CohortId)
-		//			.OnDelete(DeleteBehavior.Restrict);
-
-		//		entity.HasOne(s => s.CourseOfInterest) // Configure many-to-one relationship
-		//			.WithMany(c => c.Students)
-		//			.HasForeignKey(s => s.CourseId)
-		//			.OnDelete(DeleteBehavior.Restrict);
-		//	});
-
-		//	// Configure the Course entity
-		//	modelBuilder.Entity<Course>(entity =>
-		//	{
-		//		entity.HasKey(e => e.CourseId); // Specify primary key
-
-		//		entity.Property(e => e.Title)
-		//			.IsRequired() // Make Title property required
-		//			.HasMaxLength(200); // Set a maximum length for Title
-
-		//		entity.HasMany(c => c.Students) // Configure one-to-many relationship
-		//			.WithOne(s => s.CourseOfInterest)
-		//			.HasForeignKey(s => s.CourseId)
-		//			.OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
-
-		//		entity.HasOne(c => c.Facilitator) // Configure many-to-one relationship
-		//			.WithMany(f => f.Courses)
-		//			.HasForeignKey(c => c.FacilitatorId)
-		//			.OnDelete(DeleteBehavior.Restrict);
-		//	});
-
-		//	// Configure the Facilitator entity
-		//	modelBuilder.Entity<Facilitator>(entity =>
-		//	{
-		//		entity.HasKey(e => e.FacilitatorId); // Specify primary key
-
-		//		entity.HasMany(f => f.Courses) // Configure one-to-many relationship
-		//			.WithOne(c => c.Facilitator)
-		//			.HasForeignKey(c => c.FacilitatorId)
-		//			.OnDelete(DeleteBehavior.Restrict);
-		//	});
-
-		//	base.OnModelCreating(modelBuilder);
-		//}
+			modelBuilder.Entity<SubmitAssignment>()
+				.HasKey(s => s.Id); // Set Id as the primary key
+		}
 
 
 

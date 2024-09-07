@@ -13,6 +13,7 @@ namespace NupatDashboardProject.Services
 		{
 			_context = context;
 		}
+		//get cohorts 
 		public async Task<IEnumerable<string>> GetCohortsAsync()
 		{
 			// Fetch distinct cohort names from the database
@@ -22,6 +23,7 @@ namespace NupatDashboardProject.Services
 								 .ToListAsync();
 		}
 
+		//Get all scheduledclass related to cohort
 		public async Task<IEnumerable<ClassSchedule>> GetScheduledClassesAsync(string cohort)
 		{
 			// Fetch all classes for the specified cohort
@@ -30,6 +32,7 @@ namespace NupatDashboardProject.Services
 								 .ToListAsync();
 		}
 
+		//Add ClassSchedule 
 		public async Task<bool> ScheduleClassAsync(ClassSchedule classSchedule)
 		{
 			try

@@ -164,84 +164,26 @@ namespace NupatDashboardProject.Controllers
 			return Ok("Content uploaded successfully.");
 		}
 
-		// POST: api/Assignments/submit
-		[HttpPost("submitAssignment")]
-		public async Task<IActionResult> SubmitAssignment([FromForm] SubmitAssignmentDTO submitAssignmentDTO)
+		[HttpGet("GetAllSubmittedAssignments")]
+		public async Task<IActionResult> GetSubmittedAssignments()
 		{
-			long maxFileSize = 100 * 1024 * 1024; // 100 MB in bytes
-
-			if (submitAssignmentDTO.File == null || submitAssignmentDTO.File.Length == 0)
-				return BadRequest("No file uploaded.");
-
-			if (submitAssignmentDTO.File.Length > maxFileSize)
-				throw new InvalidOperationException("File size exceeds the maximum allowed limit of 100 MB.");
-
-			// Check if the assignment exists
-			var assignment = await _context.Assignments.FindAsync(submitAssignmentDTO.AssignmentId);
-			if (assignment == null)
-			{
-				return NotFound("Assignment not found.");
-			}
-
-			// Check if the assignment is still open for submission
-			if (assignment.DueDate < DateTime.Now)
-			{
-				return BadRequest("The assignment submission deadline has passed.");
-			}
-
-			// Store the file data and update assignment status
-			using (var memoryStream = new MemoryStream())
-			{
-				await submitAssignmentDTO.File.CopyToAsync(memoryStream);
-				assignment.FileData = memoryStream.ToArray();
-				assignment.SubmissionDate = DateTime.Now;
-				assignment.Status = "Submitted"; // Or any other status you'd like to set
-				assignment.FilePath = submitAssignmentDTO.File.FileName; // Assuming FilePath stores the file name
-			}
-
-			_context.Assignments.Update(assignment);
-			await _context.SaveChangesAsync();
-
-			return Ok("Assignment submitted successfully.");
+			var subAssignments = await _context.SubmittedAssignments.ToListAsync();
+			return Ok(subAssignments);
 		}
 
-		// GET: api/Assignments/download/{assignmentId}
-		[HttpGet("downloadAssignment/{assignmentId}")]
-		public async Task<IActionResult> DownloadAssignment(Guid assignmentId)
+		[HttpGet("GetSubmittedAssignmentById")]
+		public async Task<IActionResult> GetSubmittedAssignmentById(Guid id)
 		{
-			// Retrieve the assignment from the database
-			var assignment = await _context.Assignments.FindAsync(assignmentId);
-			if (assignment == null)
+			var subAssignment = await _context.SubmittedAssignments.FindAsync(id);
+
+			if (subAssignment == null)
 			{
-				return NotFound("Assignment not found.");
+				return NotFound();
 			}
 
-			// Check if the assignment has a file attached
-			if (assignment.FileData == null || assignment.FileData.Length == 0)
-			{
-				return NotFound("No file available for this assignment.");
-			}
-
-			// Set the content type based on the file extension (optional, for better browser support)
-			var contentType = "application/octet-stream"; // Default binary stream
-			var extension = Path.GetExtension(assignment.FilePath)?.ToLowerInvariant();
-			if (!string.IsNullOrEmpty(extension))
-			{
-				contentType = extension switch
-				{
-					".pdf" => "application/pdf",
-					".doc" or ".docx" => "application/msword",
-					".xls" or ".xlsx" => "application/vnd.ms-excel",
-					".jpg" or ".jpeg" => "image/jpeg",
-					".png" => "image/png",
-					_ => "application/octet-stream",
-				};
-			}
-
-			// Return the file for download
-			var fileStream = new MemoryStream(assignment.FileData);
-			return File(fileStream, contentType, assignment.FilePath);
+			return Ok(subAssignment);
 		}
+
 
 		//Get all student assignments
 		[HttpGet("GetAllAssignments")]
@@ -314,7 +256,6 @@ namespace NupatDashboardProject.Controllers
 				return StatusCode(500, new { message = "An error occurred while updating the assignment.", error = ex.Message });
 			}
 		}
-
 
 		//Delete assignment
 		[HttpDelete("DeleteAssignmentBy{id}")]

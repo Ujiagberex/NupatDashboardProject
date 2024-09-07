@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
+using NupatDashboardProject.Models;
 
 namespace NupatDashboardProject.Controllers
 {
@@ -15,20 +17,41 @@ namespace NupatDashboardProject.Controllers
 			_eventService = eventService;
 		}
 
-		//Post Event
-		[HttpPost("Schedule")]
-		public async Task<IActionResult> ScheduleEvent([FromForm] IFormFile image, [FromForm] string eventLink)
+		// POST: api/event/schedule
+		[HttpPost("schedule")]
+		public async Task<IActionResult> ScheduleEvent([FromForm] ScheduleEventDTO eventDTO)
 		{
-			var result = await _eventService.ScheduleEventAsync(image, eventLink);
-			return result ? Ok("Event scheduled successfully") : StatusCode(500, "Failed to schedule event");
+			if (eventDTO.Image == null || string.IsNullOrEmpty(eventDTO.EventLink))
+				return BadRequest("Invalid event data.");
+
+			var result = await _eventService.ScheduleEventAsync(eventDTO);
+
+			if (!result)
+				return StatusCode(500, "Error scheduling the event.");
+
+			return Ok("Event scheduled successfully.");
 		}
 
-		//Get events
-		[HttpGet("Events")]
+		// GET: api/event
+		[HttpGet]
 		public async Task<IActionResult> GetScheduledEvents()
 		{
 			var events = await _eventService.GetScheduledEventsAsync();
 			return Ok(events);
+		}
+
+		// DELETE: api/event/{id}
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> DeleteEventById(int id)
+		{
+			var result = await _eventService.DeleteEventByIdAsync(id);
+
+			if (!result)
+			{
+				return NotFound("Event not found.");
+			}
+
+			return Ok("Event deleted successfully.");
 		}
 	}
 }

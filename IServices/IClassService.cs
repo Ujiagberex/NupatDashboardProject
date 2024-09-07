@@ -1,4 +1,5 @@
-﻿using NupatDashboardProject.Models;
+﻿using NupatDashboardProject.DTO;
+using NupatDashboardProject.Models;
 
 namespace NupatDashboardProject.IServices
 {
@@ -11,7 +12,8 @@ namespace NupatDashboardProject.IServices
 
 	public interface IEventService
 	{
-		Task<bool> ScheduleEventAsync(IFormFile image, string eventLink);
+		Task<bool> ScheduleEventAsync(ScheduleEventDTO eventDTO);
 		Task<IEnumerable<Event>> GetScheduledEventsAsync();
+		Task<bool> DeleteEventByIdAsync(int eventId);
 	}
 }

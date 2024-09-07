@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
@@ -20,7 +19,7 @@ namespace NupatDashboardProject.Controllers
 		}
 
 		
-		[HttpGet("GetStudentById/{id}")]
+		[HttpGet("GetStudentBy{id}")]
 		public async Task<IActionResult> GetStudentById(string id)
 		{
 			if (string.IsNullOrEmpty(id))
@@ -73,7 +72,7 @@ namespace NupatDashboardProject.Controllers
 		}
 
 
-		[HttpDelete("DeleteStudentBy{Id}")]
+		[HttpDelete("DeleteStudentBy{id}")]
 		public async Task<IActionResult> DeleteStudentById(string id)
 		{
 			if (string.IsNullOrEmpty(id))

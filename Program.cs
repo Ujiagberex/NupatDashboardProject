@@ -32,7 +32,8 @@ namespace NupatDashboardProject
 				return new Cloudinary(new Account(config.CloudName, config.ApiKey, config.ApiSecret));
 			});
 
-			builder.Services.AddHttpContextAccessor();
+			builder.Services.AddScoped<IClassService, ClassService>();
+			builder.Services.AddScoped<IEventService, EventService>();
 			builder.Services.AddScoped<IProfile, ProfileServices>();
 			builder.Services.AddScoped<IStudent, StudentService>();
 			builder.Services.AddScoped<IPhotoService, PhotoService>();
@@ -43,7 +44,7 @@ namespace NupatDashboardProject
 			builder.Services.AddScoped<ITokenGenerator, TokenGeneratorService>();
 			builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
 			builder.Services.Configure<ElasticSearchConfig>(builder.Configuration.GetSection("Elasticsearch"));
-			builder.Services.AddControllers();
+			
 
 			//Add Identity
 			builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -98,19 +99,30 @@ namespace NupatDashboardProject
 				ClockSkew = TimeSpan.Zero
 			}; 
 		});
+			//builder.Services.AddCors(options =>
+			//{
+			//	options.AddPolicy("AllowAllOrigins",
+			//	builder =>
+			//	{
+			//		builder.WithOrigins("https://nupat-student-dashboard-chi.vercel.app", "https://student-dashboard-azure.vercel.app") // Add allowed origins here
+			//			   .AllowAnyMethod()
+			//			   .AllowAnyHeader()
+			//			   .AllowCredentials(); // Allows cookies/authentication tokens
+			//	});
+
+			//});
+
 			builder.Services.AddCors(options =>
 			{
-				options.AddPolicy("AllowAllOrigins",
-				builder =>
-				{
-					builder.WithOrigins("https://nupat-student-dashboard-chi.vercel.app", "https://student-dashboard-azure.vercel.app") // Add allowed origins here
-						   .AllowAnyMethod()
-						   .AllowAnyHeader()
-						   .AllowCredentials(); // Allows cookies/authentication tokens
-				});
-
-
+				options.AddPolicy("AllowAll",
+					builder =>
+					{
+						builder.AllowAnyOrigin()
+							   .AllowAnyMethod()
+							   .AllowAnyHeader();
+					});
 			});
+			builder.Services.AddControllers();
 
 			//Add dbcontext to project
 			string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -151,7 +163,7 @@ namespace NupatDashboardProject
 			app.UseSwaggerUI();
 
 			app.UseHttpsRedirection();			
-			app.UseCors("AllowAllOrigins");
+			app.UseCors("AllowAll");
 			app.UseRouting();
 
 			app.UseAuthentication();

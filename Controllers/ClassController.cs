@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using NupatDashboardProject.IServices;
 using NupatDashboardProject.Models;
 
@@ -16,7 +15,7 @@ namespace NupatDashboardProject.Controllers
 			_classService = classService;
 		}
 
-		[HttpPost("schedule")]
+		[HttpPost("CreateSchedule")]
 		public async Task<IActionResult> ScheduleClass([FromBody] ClassSchedule classSchedule)
 		{
 			var result = await _classService.ScheduleClassAsync(classSchedule);
@@ -30,7 +29,7 @@ namespace NupatDashboardProject.Controllers
 			return Ok(cohorts);
 		}
 
-		[HttpGet("scheduled-classes")]
+		[HttpGet("GetScheduled-classes")]
 		public async Task<IActionResult> GetScheduledClasses([FromQuery] string cohort)
 		{
 			var classes = await _classService.GetScheduledClassesAsync(cohort);
