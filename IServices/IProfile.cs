@@ -6,7 +6,7 @@ namespace NupatDashboardProject.IServices
 {
     public interface IProfile
     {
-        void AddProfile(AddProfileDTO addProfileDTO);
+        void AddProfile(AddStudentProfileDTO addProfileDTO);
         Profile GetProfileById(Guid id);
 		IEnumerable<Profile> GetAllProfiles();
 		bool DeleteProfileById(Guid id);

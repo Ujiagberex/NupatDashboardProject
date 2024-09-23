@@ -1,6 +1,6 @@
 ﻿namespace NupatDashboardProject.DTO
 {
-	public class AddProfileDTO : ProfileDTO
+	public class AddStudentProfileDTO : ProfileDTO
 	{
 		
 	}

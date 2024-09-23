@@ -163,7 +163,7 @@ namespace NupatDashboardProject.Controllers
 		//Create Profile
 		[HttpPost]
 		[Route("CreateProfile")]
-		public IActionResult AddProfile(AddProfileDTO profile)
+		public IActionResult AddProfile(AddStudentProfileDTO profile)
 		{
 			_profile.AddProfile(profile);
 

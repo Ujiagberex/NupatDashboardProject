@@ -12,8 +12,8 @@ using NupatDashboardProject.Data;
 namespace NupatDashboardProject.Migrations
 {
     [DbContext(typeof(LmsDbContext))]
-    [Migration("20240907140224_SchduleEvent2")]
-    partial class SchduleEvent2
+    [Migration("20240917222511_UpdateRelationships")]
+    partial class UpdateRelationships
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,6 +23,21 @@ namespace NupatDashboardProject.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("CourseStudent", b =>
+                {
+                    b.Property<Guid>("CoursesCourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("StudentsId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CoursesCourseId", "StudentsId");
+
+                    b.HasIndex("StudentsId");
+
+                    b.ToTable("CourseStudents", (string)null);
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -165,18 +180,12 @@ namespace NupatDashboardProject.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("Cohort")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Course")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
@@ -250,6 +259,9 @@ namespace NupatDashboardProject.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("DateUploaded")
                         .HasColumnType("datetime2");
 
@@ -268,6 +280,8 @@ namespace NupatDashboardProject.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AssignmentId");
+
+                    b.HasIndex("CourseId");
 
                     b.ToTable("Assignments");
                 });
@@ -323,10 +337,27 @@ namespace NupatDashboardProject.Migrations
                     b.ToTable("ClassSchedules");
                 });
 
+            modelBuilder.Entity("NupatDashboardProject.Models.Cohort", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Cohort");
+                });
+
             modelBuilder.Entity("NupatDashboardProject.Models.Content", b =>
                 {
                     b.Property<Guid>("ContentId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<byte[]>("FileData")
@@ -346,6 +377,8 @@ namespace NupatDashboardProject.Migrations
 
                     b.HasKey("ContentId");
 
+                    b.HasIndex("CourseId");
+
                     b.ToTable("Contents");
                 });
 
@@ -355,17 +388,21 @@ namespace NupatDashboardProject.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("FacilitatorId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("CohortId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("FacilitatorName")
+                    b.Property<string>("FacilitatorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("CourseId");
+
+                    b.HasIndex("CohortId");
 
                     b.HasIndex("FacilitatorId");
 
@@ -393,22 +430,31 @@ namespace NupatDashboardProject.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("NupatDashboardProject.Models.Facilitator", b =>
+            modelBuilder.Entity("NupatDashboardProject.Models.FacilitatorProfile", b =>
                 {
-                    b.Property<Guid>("FacilitatorId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Course")
+                    b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("FacilitatorId");
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("Facilitators");
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("facilitatorProfiles");
                 });
 
             modelBuilder.Entity("NupatDashboardProject.Models.Profile", b =>
@@ -490,41 +536,11 @@ namespace NupatDashboardProject.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("NupatDashboardProject.Models.StudentResource", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<DateTime>("DateUploaded")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("FileSize")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("StudentResources");
-                });
-
             modelBuilder.Entity("NupatDashboardProject.Models.SubmitAssignment", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("SubmitAssignmentId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid>("AssignmentId")
                         .HasColumnType("uniqueidentifier");
@@ -543,55 +559,58 @@ namespace NupatDashboardProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StudentId")
+                    b.Property<string>("Id")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("SubmissionDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
+                    b.HasKey("SubmitAssignmentId");
 
                     b.HasIndex("AssignmentId");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("Id");
 
                     b.ToTable("SubmittedAssignments");
                 });
 
-            modelBuilder.Entity("NupatDashboardProject.Models.Test", b =>
+            modelBuilder.Entity("NupatDashboardProject.Models.Facilitator", b =>
                 {
-                    b.Property<Guid>("TestId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.HasBaseType("NupatDashboardProject.Models.ApplicationUser");
 
-                    b.Property<DateTime>("TestDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("TestId");
-
-                    b.ToTable("Tests");
+                    b.HasDiscriminator().HasValue("Facilitator");
                 });
 
             modelBuilder.Entity("NupatDashboardProject.Models.Student", b =>
                 {
                     b.HasBaseType("NupatDashboardProject.Models.ApplicationUser");
 
-                    b.Property<Guid?>("CourseId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("CohortId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("CourseId");
+                    b.HasIndex("CohortId");
 
                     b.HasDiscriminator().HasValue("Student");
+                });
+
+            modelBuilder.Entity("CourseStudent", b =>
+                {
+                    b.HasOne("NupatDashboardProject.Models.Course", null)
+                        .WithMany()
+                        .HasForeignKey("CoursesCourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NupatDashboardProject.Models.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -645,33 +664,59 @@ namespace NupatDashboardProject.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("NupatDashboardProject.Models.Assignment", b =>
+                {
+                    b.HasOne("NupatDashboardProject.Models.Course", "Course")
+                        .WithMany("Assignments")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("NupatDashboardProject.Models.Content", b =>
+                {
+                    b.HasOne("NupatDashboardProject.Models.Course", "Course")
+                        .WithMany("Contents")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
             modelBuilder.Entity("NupatDashboardProject.Models.Course", b =>
                 {
+                    b.HasOne("NupatDashboardProject.Models.Cohort", "Cohort")
+                        .WithMany("Courses")
+                        .HasForeignKey("CohortId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("NupatDashboardProject.Models.Facilitator", "Facilitator")
-                        .WithMany()
+                        .WithMany("Courses")
                         .HasForeignKey("FacilitatorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Cohort");
 
                     b.Navigation("Facilitator");
                 });
 
             modelBuilder.Entity("NupatDashboardProject.Models.SubmitAssignment", b =>
                 {
-                    b.HasOne("NupatDashboardProject.Models.ApplicationUser", null)
-                        .WithMany("SubmittedAssignments")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("NupatDashboardProject.Models.Assignment", "Assignment")
                         .WithMany("SubmittedAssignments")
                         .HasForeignKey("AssignmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NupatDashboardProject.Models.ApplicationUser", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("NupatDashboardProject.Models.Student", "Student")
+                        .WithMany("SubmittedAssignments")
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Assignment");
@@ -681,14 +726,13 @@ namespace NupatDashboardProject.Migrations
 
             modelBuilder.Entity("NupatDashboardProject.Models.Student", b =>
                 {
-                    b.HasOne("NupatDashboardProject.Models.Course", null)
+                    b.HasOne("NupatDashboardProject.Models.Cohort", "Cohort")
                         .WithMany("Students")
-                        .HasForeignKey("CourseId");
-                });
+                        .HasForeignKey("CohortId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-            modelBuilder.Entity("NupatDashboardProject.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("SubmittedAssignments");
+                    b.Navigation("Cohort");
                 });
 
             modelBuilder.Entity("NupatDashboardProject.Models.Assignment", b =>
@@ -696,9 +740,28 @@ namespace NupatDashboardProject.Migrations
                     b.Navigation("SubmittedAssignments");
                 });
 
+            modelBuilder.Entity("NupatDashboardProject.Models.Cohort", b =>
+                {
+                    b.Navigation("Courses");
+
+                    b.Navigation("Students");
+                });
+
             modelBuilder.Entity("NupatDashboardProject.Models.Course", b =>
                 {
-                    b.Navigation("Students");
+                    b.Navigation("Assignments");
+
+                    b.Navigation("Contents");
+                });
+
+            modelBuilder.Entity("NupatDashboardProject.Models.Facilitator", b =>
+                {
+                    b.Navigation("Courses");
+                });
+
+            modelBuilder.Entity("NupatDashboardProject.Models.Student", b =>
+                {
+                    b.Navigation("SubmittedAssignments");
                 });
 #pragma warning restore 612, 618
         }

@@ -26,20 +26,28 @@ namespace NupatDashboardProject.Services
 				return ("Student ID is required");
 			}
 
-			var student = await _userManager.FindByIdAsync(id);
+			var user = await _userManager.FindByIdAsync(id);
 
-			if (student == null)
+			if (user == null)
 			{
 				return ("Student not found");
 			}
 
-			var studentDTO = new StudentDTO()
+            // Cast to Student
+            var student = user as Student;
+
+            if (student == null)
+            {
+                return ("User is not a student");
+            }
+
+            var studentDTO = new StudentDTO()
 			{
 				Id = student.Id,
 				Email = student.Email,
 				FullName = student.FullName,
-				Cohort = student.Cohort,
-				Course = student.Course
+				CohortId = student.CohortId,
+				CourseId = student.CourseId
 			};
 
 			return studentDTO.ToString();

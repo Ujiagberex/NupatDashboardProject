@@ -13,13 +13,6 @@ namespace NupatDashboardProject.Services
         {
             _context = context;
         }
-		public async Task<IEnumerable<Course>> GetMostPopularCoursesAsync(int limit)
-		{
-			return await _context.Courses
-				.Include(c => c.Students)
-				.OrderByDescending(c => c.Students.Count)
-				.Take(limit)
-				.ToListAsync();
-		}
+		
 	}
 }

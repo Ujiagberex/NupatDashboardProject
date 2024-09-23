@@ -10,15 +10,15 @@ namespace NupatDashboardProject.Controllers
 	[ApiController]
 	public class StudentController : ControllerBase
 	{
-		private readonly IStudent _student;
+		
 		private readonly UserManager<ApplicationUser> _userManager;
-		public StudentController(IStudent student, UserManager<ApplicationUser> userManager)
+		public StudentController( UserManager<ApplicationUser> userManager)
 		{
-			_student = student;
+			
 			_userManager = userManager;
 		}
 
-		
+		//Get Student by Id
 		[HttpGet("GetStudentBy{id}")]
 		public async Task<IActionResult> GetStudentById(string id)
 		{
@@ -27,51 +27,63 @@ namespace NupatDashboardProject.Controllers
 				return BadRequest("Invalid student ID");
 			}
 
-			var student = await _userManager.FindByIdAsync(id.ToString());
+			var user = await _userManager.FindByIdAsync(id);
 
-			if (student == null)
+			if (user == null)
 			{
 				return NotFound("Student not found");
 			}
 
-			var studentDTO = new StudentDTO()
+            // Cast to Student
+            var student = user as Student;
+
+            if (student == null)
+            {
+                return BadRequest("User is not a student");
+            }
+
+            var studentDTO = new StudentDTO()
 			{
 				Id = student.Id,
 				Email = student.Email,
 				FullName = student.FullName,
-				Cohort = student.Cohort,
-				Course = student.Course
+				CohortId = student.CohortId,
+				CourseId = student.CourseId
 			};
 
 			return Ok(studentDTO);
 		}
 
+		//Get all Students 
 		[HttpGet("GetAllStudents")]
 		public async Task<IActionResult> GetAllStudents()
 		{
 			// Assuming "Student" is the role name for students
-			var students = await _userManager.GetUsersInRoleAsync("Student");  /*GetUsersInRoleAsync("Student");*/
+			var usersInRole = await _userManager.GetUsersInRoleAsync("Student");
 
-			if (students == null || !students.Any())
+			if (usersInRole == null || !usersInRole.Any())
 			{
 				return NotFound("No students found");
 			}
 
-			// Map the students to a list of StudentDTOs
-			var studentDTOs = students.Select(student => new StudentDTO
+            // Filter and cast users to Student
+            var students = usersInRole.OfType<Student>().ToList();
+
+            // Map the students to a list of StudentDTOs
+            var studentDTOs = students.Select(student => new StudentDTO
 			{
 				Id = student.Id,
 				FullName = student.FullName,
 				Email = student.Email,
-				Cohort = student.Cohort,
-				Course = student.Course
+				CohortId = student.CohortId,
+				CourseId = student.CourseId
 
 			}).ToList();
 
 			return Ok(studentDTOs);
 		}
 
-
+		//Delete Student by Id
 		[HttpDelete("DeleteStudentBy{id}")]
 		public async Task<IActionResult> DeleteStudentById(string id)
 		{

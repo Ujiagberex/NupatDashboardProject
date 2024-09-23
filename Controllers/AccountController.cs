@@ -1,14 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
 using NupatDashboardProject.Models;
-using NupatDashboardProject.Services;
 
 namespace NupatDashboardProject.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class AccountController : ControllerBase
 	{
@@ -20,8 +18,8 @@ namespace NupatDashboardProject.Controllers
 			this.userManager = userManager;
 
 		}
+		
 		[HttpPost("RegisterStudent")]
-
 		public async Task<IActionResult> RegisterNewStudent(RegisterStudentDTO StudentDTO)
 		{
 			var Response = await userAuth.RegisterStudent(StudentDTO);
@@ -29,7 +27,6 @@ namespace NupatDashboardProject.Controllers
 		}
 
 		[HttpPost("RegisterFacilitator")]
-
 		public async Task<IActionResult> RegisterNewFacilitator(RegisterFacilitatorDTO FacilitatorDTO)
 		{
 

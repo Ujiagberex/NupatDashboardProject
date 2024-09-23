@@ -7,5 +7,9 @@
 		public string FileName { get; set; }
 		public byte[] FileData { get; set; }
 		public DateTime UploadDate { get; set; }
-	}
+
+        // Relationship: Content belongs to one Course
+        public Guid CourseId { get; set; }
+        public Course Course { get; set; }
+    }
 }

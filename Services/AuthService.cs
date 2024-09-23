@@ -1,5 +1,4 @@
-﻿using System.IO.Compression;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
 using NupatDashboardProject.Models;
@@ -7,22 +6,18 @@ using NupatDashboardProject.RoleNameEnum;
 
 namespace NupatDashboardProject.Services
 {
-	public class AuthService : IAuth
+    public class AuthService : IAuth
 	{
 		private readonly UserManager<ApplicationUser> _userManager;
 		private readonly RoleManager<IdentityRole> _roleManager;
 		private readonly ITokenGenerator _tokenGenerator;
 		private readonly IConfiguration _configuration;
-		private readonly ILogger<AuthService> _logger;
-
-
+		
 		public AuthService(RoleManager<IdentityRole> roleManager, 
 			UserManager<ApplicationUser> userManager, 
-			ITokenGenerator tokenGenerator, 
-			IConfiguration configuration,
-			ILogger<AuthService> logger)
+			ITokenGenerator tokenGenerator,
+			IConfiguration configuration)
 		{
-			_logger = logger;
 			_roleManager = roleManager;
 			_userManager = userManager;
 			_tokenGenerator = tokenGenerator;
@@ -34,40 +29,6 @@ namespace NupatDashboardProject.Services
 			var user = await _userManager.FindByEmailAsync(userName);
 			return user;
 		}
-
-
-		//Login Service
-		//public async Task<(bool, AuthResponse)> LoginUser(LoginDTO loginUserDTO)
-		//{
-		//	if (loginUserDTO == null)
-		//	{
-		//		throw new ArgumentNullException(nameof(loginUserDTO));
-		//	}
-
-
-		//	// Check user has a registered email
-		//	var user = await _userManager.FindByEmailAsync(loginUserDTO.UserName);
-		//	if (user == null )
-		//	{
-		//		return (false, null);
-
-		//	}
-		//	// Check if the provided password is the fixed password
-		//	if (loginUserDTO.Password != "Nupat_24")
-		//	{
-		//		// Check if the provided password is correct
-		//		var passwordValid = await _userManager.CheckPasswordAsync(user, loginUserDTO.Password);
-		//		if (!passwordValid)
-		//		{
-		//			return (false, null);
-		//		}
-		//	}
-
-		//	var roles = await _userManager.GetRolesAsync(user);
-		//	var jwtToken = await _tokenGenerator.GenerateJwtToken(user.Id, user.PhoneNumber, user.UserName, user.Email, user.FullName, roles);
-
-		//	return  (true, jwtToken);
-		//}
 
 		public async Task<(bool, AuthResponse)> LoginUser(LoginDTO loginUserDTO)
 		{
@@ -112,11 +73,11 @@ namespace NupatDashboardProject.Services
 		{
 			
 
-			ApplicationUser facilitator = new ApplicationUser()
+			Facilitator facilitator = new Facilitator()
 			{
 				Email = registerFacilitatorDTO.Email,
 				FullName = registerFacilitatorDTO.FullName,
-				Course = registerFacilitatorDTO.Course,
+				CourseId = registerFacilitatorDTO.CourseId,
 				EmailConfirmed = true,
 				UserName = registerFacilitatorDTO.Email
 			};
@@ -159,12 +120,12 @@ namespace NupatDashboardProject.Services
 		{
 			//string defaultPassword = _configuration["DefaultPassword:"];
 
-			ApplicationUser student = new ApplicationUser()
+			Student student = new Student()
 			{
 				Email = registerStudentDTO.Email,
 				FullName = registerStudentDTO.FullName,
-				Course = registerStudentDTO.Course,
-				Cohort = registerStudentDTO.Cohorts,
+				CourseId = registerStudentDTO.CourseId,
+				CohortId = registerStudentDTO.CohortId,
 				EmailConfirmed = true,
 				UserName = registerStudentDTO.Email
 			};

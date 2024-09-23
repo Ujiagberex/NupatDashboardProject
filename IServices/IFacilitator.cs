@@ -6,10 +6,9 @@ namespace NupatDashboardProject.IServices
 {
 	public interface IFacilitator
 	{
-		void AddFacilitator(AddFacilitatorDTO addFacilitatorDTO);
-		Facilitator GetfacilitatorById(Guid id);
+		Facilitator GetfacilitatorById(string id);
 		IEnumerable<Facilitator> GetAllFacilitators();
-		bool DeleteFacilitatorById(Guid id);
-		ShowFacilitatorDTO UpdateFacilitatorById(Facilitator facilitator);
+		bool DeleteFacilitatorById(string id);
+        ShowFaciltatorProfileDTO UpdateFacilitatorById(Facilitator facilitator);
 	}
 }

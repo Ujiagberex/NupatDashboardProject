@@ -122,13 +122,6 @@ namespace NupatDashboardProject.Controllers
 			return File(fileStream, contentType, assignment.FilePath);
 		}
 
-		[HttpGet("PopularCourses")]
-		public async Task<ActionResult<IEnumerable<Course>>> GetMostPopularCourses([FromQuery] int limit = 10)
-		{
-			var courses = await _courseRepository.GetMostPopularCoursesAsync(limit);
-			return Ok(courses);
-		}
-
 		[HttpDelete("DeleteSubmittedAssignmentById")]
 		public async Task<IActionResult> DeleteSubmittedAssignmentById(Guid id)
 		{
@@ -190,7 +183,7 @@ namespace NupatDashboardProject.Controllers
 			}
 
 			var existingSubmission = await _dbContext.SubmittedAssignments
-			.FirstOrDefaultAsync(sa => sa.AssignmentId == submitAssignmentDTO.AssignmentId && sa.StudentId == submitAssignmentDTO.StudentId);
+			.FirstOrDefaultAsync(sa => sa.AssignmentId == submitAssignmentDTO.AssignmentId && sa.Id == submitAssignmentDTO.StudentId);
 
 			if (existingSubmission != null)
 			{
@@ -200,7 +193,7 @@ namespace NupatDashboardProject.Controllers
 			var submittedAssignment = new SubmitAssignment
 			{
 				AssignmentId = submitAssignmentDTO.AssignmentId,
-				StudentId = student.Id, // Assuming StudentId is part of the DTO
+				Id = student.Id, // Assuming StudentId is part of the DTO
 				DueDate = assignment.DueDate,
 				DateUploaded = assignment.DateUploaded,
 				SubmissionDate = DateTime.Now,

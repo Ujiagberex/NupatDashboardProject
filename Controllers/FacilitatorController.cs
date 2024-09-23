@@ -1,32 +1,110 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NupatDashboardProject.Data;
 using NupatDashboardProject.DTO;
 using NupatDashboardProject.IServices;
 using NupatDashboardProject.Models;
-using ServiceStack.Text;
 
 namespace NupatDashboardProject.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class FacilitatorController : ControllerBase
 	{
 		
 		private readonly LmsDbContext _context;
 		private readonly IFacilitator _facilitator;
-		
 
-		public FacilitatorController(LmsDbContext context, IFacilitator facilitator)
+        public UserManager<ApplicationUser> _userManager { get; }
+
+        public FacilitatorController(LmsDbContext context, IFacilitator facilitator, UserManager<ApplicationUser> userManager)
 		{
 			_context = context;
 			_facilitator = facilitator;
-			
-		}
+            _userManager = userManager;
+        }
 
-		//Upload Content By Facilitator
-		[HttpPost("UploadContent")]
+        //Get Facilitator by Id
+        [HttpGet("GetFacilitatorBy{id}")]
+        public async Task<IActionResult> GetFacilitatorById(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("Invalid student ID");
+            }
+
+            var facilitator = await _userManager.FindByIdAsync(id.ToString());
+
+            if (facilitator == null)
+            {
+                return NotFound("Student not found");
+            }
+
+            var facilitatorDTO = new FacilitatorDTO ()
+            {
+                Id = facilitator.Id,
+                Email = facilitator.Email,
+                FullName = facilitator.FullName,
+                CourseId = facilitator.CourseId
+            };
+
+            return Ok(facilitatorDTO);
+        }
+
+		//Get All Facilitators
+		[HttpGet("GetAllFacilitators")]
+		public async Task<IActionResult> GetAllFacilitator()
+		{
+            // Assuming "Facilitator" is the role name for facilitators
+            var facilitators = await _userManager.GetUsersInRoleAsync("Facilitator");
+
+            if (facilitators == null || !facilitators.Any())
+            {
+                return NotFound("Facilitators not found");
+            }
+
+            // Map the students to a list of StudentDTOs
+            var facilitatorDTOs = facilitators.Select(facilitator => new FacilitatorDTO
+            {
+                Id = facilitator.Id,
+                FullName = facilitator.FullName,
+                Email = facilitator.Email,
+                CourseId = facilitator.CourseId
+            }).ToList();
+
+            return Ok(facilitatorDTOs);
+        }
+
+        //Delete Facilitator
+        [HttpDelete("DeleteFacilitatorBy{id}")]
+        public async Task<IActionResult> DeleteFacilitatorById(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("Facilitator ID cannot be null or empty.");
+            }
+
+            // Find the facilitator by ID
+            var facilitator = await _userManager.FindByIdAsync(id);
+
+            if (facilitator == null)
+            {
+                return NotFound("The facilitator was not found");
+            }
+
+            // Delete the facilitator
+            var result = await _userManager.DeleteAsync(facilitator);
+            if (!result.Succeeded)
+            {
+                return StatusCode(500, "An error occurred while deleting the facilitator.");
+            }
+
+            return Ok("facilitator deleted successfully.");
+        }
+
+        //Upload Content By Facilitator
+        [HttpPost("UploadContent")]
 		public async Task<IActionResult> UploadContent([FromForm] UploadContentDTO uploadContentDTO)
 		{
 			if (uploadContentDTO.File == null || uploadContentDTO.File.Length == 0)
@@ -256,6 +334,8 @@ namespace NupatDashboardProject.Controllers
 				return StatusCode(500, new { message = "An error occurred while updating the assignment.", error = ex.Message });
 			}
 		}
+
+		
 
 		//Delete assignment
 		[HttpDelete("DeleteAssignmentBy{id}")]

@@ -13,7 +13,7 @@ namespace NupatDashboardProject.Services
         {
             _dbContext = dbContext;
         }
-        public void AddProfile(AddProfileDTO addProfileDTO)
+        public void AddProfile(AddStudentProfileDTO addProfileDTO)
 		{
 
 			Profile profile = new Profile

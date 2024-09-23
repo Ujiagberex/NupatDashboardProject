@@ -10,6 +10,11 @@
 		public string FilePath { get; set; }
 		public string? Status { get; set; }
 
-		public ICollection<SubmitAssignment> SubmittedAssignments { get; set; }
-	}
+        // Relationship: Assignment belongs to one Course
+        public Guid CourseId { get; set; }
+        public Course Course { get; set; }
+
+        // Relationship: Assignment has many SubmittedAssignments
+        public ICollection<SubmitAssignment> SubmittedAssignments { get; set; }
+    }
 }

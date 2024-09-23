@@ -11,9 +11,8 @@ namespace NupatDashboardProject.DTO
 		[Required]
 		[StringLength(100)]
 		public string FullName {  get; set; }
-		[Required]
-		[StringLength(100)]
-		public string Course { get; set; }
+		
+		public Guid CourseId { get; set; }
       
     }
 }

@@ -41,6 +41,7 @@ namespace NupatDashboardProject
 			builder.Services.AddScoped<IFacilitator, FacilitatorService>();
 			builder.Services.AddScoped<ICourse, CourseServices>();
 			builder.Services.AddScoped<IAuth, AuthService>();
+			builder.Services.AddScoped<IFacilitatorProfileService, FacilitatorProfileService>();
 			builder.Services.AddScoped<ITokenGenerator, TokenGeneratorService>();
 			builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
 			builder.Services.Configure<ElasticSearchConfig>(builder.Configuration.GetSection("Elasticsearch"));

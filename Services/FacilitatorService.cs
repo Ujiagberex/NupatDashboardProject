@@ -9,28 +9,15 @@ namespace NupatDashboardProject.Services
 	public class FacilitatorService : IFacilitator
 	{
 		private readonly LmsDbContext _dataContext;
-		private readonly IWebHostEnvironment _environment;
+		
 
-		public FacilitatorService(LmsDbContext dataContext, IWebHostEnvironment environment)
+		public FacilitatorService(LmsDbContext dataContext)
 		{
 			_dataContext = dataContext;
-			_environment = environment;
 		}
-		public void AddFacilitator(AddFacilitatorDTO addFacilitatorDTO)
-		{
+		
 
-			Facilitator facilitator = new Facilitator
-			{
-				FacilitatorId = Guid.NewGuid(),
-				FullName = addFacilitatorDTO.FullName,
-				Course = addFacilitatorDTO.Course
-			};
-
-			_dataContext.Facilitators.Add(facilitator);
-			_dataContext.SaveChanges();
-		}
-
-		public bool DeleteFacilitatorById(Guid id)
+		public bool DeleteFacilitatorById(string id)
 		{
 			Facilitator facilitator = _dataContext.Facilitators.Find(id);
 			if (facilitator == null)
@@ -48,15 +35,15 @@ namespace NupatDashboardProject.Services
 			return _dataContext.Facilitators.AsEnumerable();
 		}
 
-		public Facilitator GetfacilitatorById(Guid id)
+		public Facilitator GetfacilitatorById(string id)
 		{
 			return _dataContext.Facilitators.Find(id);
 		}
 
 
-		public ShowFacilitatorDTO UpdateFacilitatorById(Facilitator facilitator)
+		public ShowFaciltatorProfileDTO UpdateFacilitatorById(Facilitator facilitator)
 		{
-			var FindFacilitator = GetfacilitatorById(facilitator.FacilitatorId);
+			var FindFacilitator = GetfacilitatorById(facilitator.Id);
 			if (FindFacilitator == null)
 			{
 				return null;
@@ -64,7 +51,7 @@ namespace NupatDashboardProject.Services
 			}
 			FindFacilitator.FullName = facilitator.FullName;
 			_dataContext.SaveChanges();
-			ShowFacilitatorDTO showFacilitatorDTO = new ShowFacilitatorDTO();
+			ShowFaciltatorProfileDTO showFacilitatorDTO = new ShowFaciltatorProfileDTO();
 			showFacilitatorDTO.FullName = facilitator.FullName;
 			return showFacilitatorDTO;
 		}
